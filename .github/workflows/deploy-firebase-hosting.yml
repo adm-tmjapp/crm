@@ -1,0 +1,44 @@
+name: Deploy CRM to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: firebase-hosting-live
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static CRM
+        run: npm run build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/812443835960/locations/global/workloadIdentityPools/github-actions/providers/github
+          service_account: github-crm-hosting-deploy@tmj-apps.iam.gserviceaccount.com
+
+      - name: Deploy to Firebase Hosting
+        run: npx firebase-tools@14.12.1 deploy --only hosting --project tmj-apps
