@@ -17,6 +17,7 @@ import {
   adminSecondaryNavigationItems
 } from "@/content/admin/navigation";
 import { MaterialIcon } from "@/components/admin/material-icon";
+import { AdminHeaderSheets } from "@/components/admin/admin-header-sheets";
 
 export function AdminShell({
   children
@@ -181,7 +182,7 @@ export function AdminShell({
                 </span>
                 <input
                   type="text"
-                  placeholder="Pesquisar dados, motoristas ou transacoes..."
+                  placeholder="Pesquisar dados, motoristas ou transações..."
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
@@ -197,21 +198,21 @@ export function AdminShell({
                       <div className="divide-y divide-white/10">
                         {[
                           {
-                            label: "Usuarios",
+                            label: "Usuários",
                             items: searchResults.users.map((item) => ({
                               id: item.id,
-                              primary: item.name || item.email || "Usuario",
+                              primary: item.name || item.email || "Usuário",
                               secondary: item.role || "-"
                             }))
                           },
                           {
-                            label: "Veiculos",
+                            label: "Veículos",
                             items: searchResults.vehicles.map((item) => ({
                               id: item.id,
                               primary:
                                 `${item.manufacturer || ""} ${item.modelName || ""}`.trim() ||
                                 item.vehiclePlate ||
-                                "Veiculo",
+                                "Veículo",
                               secondary: item.vehiclePlate || "-"
                             }))
                           },
@@ -255,13 +256,7 @@ export function AdminShell({
               </div>
 
               <div className="flex items-center justify-end gap-8">
-                <button className="relative text-[#b5c0d5] transition hover:text-white">
-                  <MaterialIcon name="notifications" className="h-7 w-7" />
-                  <span className="absolute right-1 top-0 h-2.5 w-2.5 rounded-full bg-[#cf2f7d]" />
-                </button>
-                <button className="text-[#b5c0d5] transition hover:text-white">
-                  <MaterialIcon name="chat" className="h-7 w-7" />
-                </button>
+                <AdminHeaderSheets />
                 <div className="hidden h-10 w-px bg-white/12 lg:block" />
                 <div className="flex items-center gap-4">
                   <div className="text-right">

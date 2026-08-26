@@ -30,7 +30,7 @@ export const adminNavigationItems = [
     icon: "database"
   },
   {
-    label: "Aprovacao de Documentos",
+    label: "Aprovação de Documentos",
     href: "/admin/documentos",
     icon: "fact_check"
   }
@@ -38,8 +38,8 @@ export const adminNavigationItems = [
 
 export const adminSecondaryNavigationItems = [
   {
-    label: "Configuracoes",
-    href: "/admin/configuracoes",
+    label: "Configurações",
+    href: "/admin/configurações",
     icon: "settings"
   }
 ];

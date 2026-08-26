@@ -169,7 +169,7 @@ export default function AdminSettingsPage() {
         }
       } catch (loadError) {
         setError(
-          loadError instanceof Error ? loadError.message : "Falha ao carregar configuracoes."
+          loadError instanceof Error ? loadError.message : "Falha ao carregar configurações."
         );
       } finally {
         setLoading(false);
@@ -360,8 +360,8 @@ export default function AdminSettingsPage() {
 
   return (
     <AdminPageShell
-      title="Configuracoes"
-      description="Estrutura de tarifacao com regras, valores-base, simulador de calculo e visao operacional das tarifas em vigor."
+      title="Configurações"
+      description="Estrutura de tarifação com regras, valores-base, simulador de cálculo e visão operacional das tarifas em vigor."
     >
       {error ? <AdminErrorState message={error} /> : null}
       {successMessage ? (
@@ -369,9 +369,9 @@ export default function AdminSettingsPage() {
           {successMessage}
         </div>
       ) : null}
-      {loading ? <AdminLoadingState label="Carregando configuracoes..." /> : null}
+      {loading ? <AdminLoadingState label="Carregando configurações..." /> : null}
       {!loading && !products.length && !tarifas.length ? (
-        <AdminEmptyState label="Nenhuma configuracao disponivel." />
+        <AdminEmptyState label="Nenhuma configuração disponível." />
       ) : null}
 
       {!loading ? (
@@ -382,10 +382,10 @@ export default function AdminSettingsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h2 className="text-[18px] font-semibold text-white">
-                      Regras de Tarifacao
+                      Regras de Tarifação
                     </h2>
                     <p className="mt-1 text-[13px] text-[#8ea0bd]">
-                      Escolha a regra para revisar os valores usados no calculo da corrida.
+                      Escolha a regra para revisar os valores usados no cálculo da corrida.
                     </p>
                   </div>
                   <button
@@ -442,15 +442,15 @@ export default function AdminSettingsPage() {
                 <StatCard
                   label="Valor base"
                   value={formatCurrency(draft.valorBase)}
-                  helper="Entrada fixa usada antes do custo por distancia."
+                  helper="Entrada fixa usada antes do custo por distância."
                 />
                 <StatCard
                   label="Valor por km"
                   value={formatCurrency(draft.valorKm)}
-                  helper="Multiplicado pela distancia estimada."
+                  helper="Multiplicado pela distância estimada."
                 />
                 <StatCard
-                  label="Taxa de intermediacao"
+                  label="Taxa de intermediação"
                   value={`${draft.taxaIntermediacao.toFixed(2)}%`}
                   helper="Aplicada sobre o subtotal da corrida."
                 />
@@ -463,10 +463,10 @@ export default function AdminSettingsPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-[18px] font-semibold text-white">
-                    Estrutura de calculo
+                    Estrutura de cálculo
                   </h2>
                   <p className="mt-1 text-[13px] text-[#8ea0bd]">
-                    Formulario base para organizar os valores cobrados junto ao calculo.
+                    Formulario base para organizar os valores cobrados junto ao cálculo.
                   </p>
                 </div>
                 <span className="rounded-lg bg-[#3c1228] px-3 py-1.5 text-[12px] text-[#d95b9a]">
@@ -483,7 +483,7 @@ export default function AdminSettingsPage() {
                     label="Nome da regra"
                     value={draft.label}
                     onChange={(value) => updateDraft("label", value)}
-                    placeholder="Ex: Tarifa urbana padrao"
+                    placeholder="Ex: Tarifa urbana padrão"
                   />
                   <InputField
                     label="Valor base"
@@ -510,10 +510,10 @@ export default function AdminSettingsPage() {
 
                 <section className="space-y-4">
                   <h3 className="text-[15px] font-semibold text-white">
-                    Taxas e vigencia
+                    Taxas e vigência
                   </h3>
                   <InputField
-                    label="Taxa de intermediacao"
+                    label="Taxa de intermediação"
                     type="number"
                     value={draft.taxaIntermediacao}
                     onChange={(value) => updateDraft("taxaIntermediacao", value)}
@@ -576,11 +576,11 @@ export default function AdminSettingsPage() {
 
               <section className="mt-6 rounded-[16px] border border-dashed border-white/10 bg-black/50 p-4">
                 <h3 className="text-[15px] font-semibold text-white">
-                  Espaco reservado para taxas adicionais
+                  Espaço reservado para taxas adicionais
                 </h3>
                 <p className="mt-2 text-[13px] text-[#8ea0bd]">
                   Aqui podemos conectar depois taxa noturna, cancelamento, aeroporto ou regras extras.
-                  A estrutura visual ja fica preparada sem depender de novos campos agora.
+                  A estrutura visual já fica preparada, sem depender de novos campos agora.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   {["Taxa noturna", "Taxa de cancelamento", "Taxa de aeroporto"].map(
@@ -601,15 +601,15 @@ export default function AdminSettingsPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-[18px] font-semibold text-white">
-                    Simulador de cobranca
+                    Simulador de cobrança
                   </h2>
                   <p className="mt-1 text-[13px] text-[#8ea0bd]">
-                    Preview do calculo atual: base + distancia + custo fixo + taxa.
+                    Preview do cálculo atual: base + distância + custo fixo + taxa.
                   </p>
                 </div>
                 <div className="w-full max-w-[180px]">
                   <InputField
-                    label="Distancia"
+                    label="Distância"
                     type="number"
                     value={simulation.distanceKm}
                     onChange={(value) =>
@@ -630,13 +630,13 @@ export default function AdminSettingsPage() {
                 <StatCard
                   label="Total estimado"
                   value={formatCurrency(preview.total)}
-                  helper="Usando a mesma composicao base do calculo atual."
+                  helper="Usando a mesma composição base do cálculo atual."
                 />
               </div>
 
               <div className="mt-5 rounded-[16px] border border-white/10 bg-black p-4">
                 <p className="text-[11px] uppercase tracking-[0.14em] text-[#7c8aa3]">
-                  Formula atual
+                  Fórmula atual
                 </p>
                 <p className="mt-2 text-[14px] text-white">
                   ({formatCurrency(draft.valorBase)} + {simulation.distanceKm} km x{" "}
@@ -732,7 +732,7 @@ export default function AdminSettingsPage() {
                     onClick={resetProductDraft}
                     className="rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold text-white"
                   >
-                    Cancelar edicao
+                    Cancelar edição
                   </button>
                 ) : null}
               </div>

@@ -110,8 +110,8 @@ export default function AdminDocumentsPage() {
 
   return (
     <AdminPageShell
-      title="Aprovacao de Documentos"
-      description="Fila operacional enriquecida com dados do usuario e acoes em lote."
+      title="Aprovação de Documentos"
+      description="Fila operacional enriquecida com dados do usuário e ações em lote."
     >
       {error ? <AdminErrorState message={error} /> : null}
       {!loading && items.length ? (

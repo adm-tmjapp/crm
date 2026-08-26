@@ -25,7 +25,7 @@ export const dashboardStats: DashboardStat[] = [
     tone: "purple"
   },
   {
-    title: "Aprovacoes Pendentes",
+    title: "Aprovações Pendentes",
     icon: "notifications_active",
     tone: "amber"
   }

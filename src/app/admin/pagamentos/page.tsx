@@ -248,7 +248,7 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
       setError(
         actionError instanceof Error
           ? actionError.message
-          : "Falha ao salvar configuracao de pagamentos."
+          : "Falha ao salvar configuração de pagamentos."
       );
     } finally {
       setSaving(false);
@@ -278,7 +278,7 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
   return (
     <AdminPageShell
       title="Pagamentos"
-      description="Fluxo financeiro, politica de meios de pagamento por escopo e auditoria operacional."
+      description="Fluxo financeiro, política de meios de pagamento por escopo e auditoria operacional."
     >
       {error ? <AdminErrorState message={error} /> : null}
       {successMessage ? (
@@ -306,7 +306,7 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
           </div>
           <div className="rounded-2xl border border-white/10 bg-[#111111] p-6">
             <div className="text-sm uppercase tracking-[0.18em] text-[#8ea0bd]">
-              SMS no mes
+              SMS no mês
             </div>
             <div className="mt-3 text-4xl font-bold text-white">
               {smsUsage?.totalMessages || 0}
@@ -321,10 +321,10 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-[20px] font-semibold text-white">
-                  Configuracao de meios de pagamento
+                  Configuração de meios de pagamento
                 </h2>
                 <p className="mt-1 text-[14px] text-[#8ea0bd]">
-                  Habilite PIX, cartao e dinheiro e defina a politica efetiva por escopo.
+                  Habilite PIX, cartão e dinheiro e defina a política efetiva por escopo.
                 </p>
               </div>
               <div className="rounded-xl bg-[#13253c] px-3 py-2 text-[12px] text-[#8fb4f2]">
@@ -432,11 +432,11 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
 
               <div className="rounded-2xl border border-white/10 bg-black p-4">
                 <p className="text-[12px] uppercase tracking-[0.1em] text-[#8ea0bd]">
-                  Politica
+                  Política
                 </p>
                 <div className="mt-4 space-y-4">
                   <label className="block">
-                    <InputLabel>Metodo padrao</InputLabel>
+                    <InputLabel>Método padrão</InputLabel>
                     <select
                       value={draft.defaultMethod}
                       onChange={(event) =>
@@ -457,7 +457,7 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
 
                   <label className="flex items-center justify-between rounded-xl border border-white/10 px-4 py-3">
                     <div>
-                      <p className="text-[14px] text-white">Permitir cartao salvo</p>
+                      <p className="text-[14px] text-white">Permitir cartão salvo</p>
                       <p className="mt-1 text-[12px] text-[#8ea0bd]">
                         Exige CREDIT_CARD habilitado no escopo.
                       </p>
@@ -509,7 +509,7 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
                   disabled={saving}
                   className="rounded-xl bg-[#cf2f7d] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
                 >
-                  {saving ? "Salvando..." : "Salvar configuracao"}
+                  {saving ? "Salvando..." : "Salvar configuração"}
                 </button>
               </div>
             </div>
@@ -518,7 +518,7 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
           <section className="rounded-[24px] border border-white/10 bg-[#111111] p-6">
             <h2 className="text-[20px] font-semibold text-white">Overrides por escopo</h2>
             <p className="mt-1 text-[14px] text-[#8ea0bd]">
-              Lista das configuracoes especificas que sobrescrevem a regra global.
+              Lista das configurações específicas que sobrescrevem a regra global.
             </p>
 
             <div className="mt-5 space-y-3">

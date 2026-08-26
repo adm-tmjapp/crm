@@ -161,7 +161,7 @@ export default function AdminProductsPage() {
               <div>
                 <h2 className="text-[20px] font-semibold text-white">Novo tipo de corrida</h2>
                 <p className="mt-1 text-[14px] text-[#8ea0bd]">
-                  Configure o nome comercial, icone e tarifa usada no calculo.
+                  Configure o nome comercial, icone e tarifa usada no cálculo.
                 </p>
               </div>
               {draft.id ? (
@@ -170,7 +170,7 @@ export default function AdminProductsPage() {
                   onClick={resetDraft}
                   className="rounded-lg border border-white/10 px-3 py-2 text-[12px] text-white"
                 >
-                  Cancelar edicao
+                  Cancelar edição
                 </button>
               ) : null}
             </div>
@@ -236,7 +236,7 @@ export default function AdminProductsPage() {
           <section className="rounded-[24px] border border-white/10 bg-[#111111] p-6">
             <h2 className="text-[20px] font-semibold text-white">Produtos cadastrados</h2>
             <p className="mt-1 text-[14px] text-[#8ea0bd]">
-              Use esta lista para revisar e editar rapidamente os tipos de corrida.
+              Use está lista para revisar e editar rapidamente os tipos de corrida.
             </p>
 
             <div className="mt-5 space-y-3">
