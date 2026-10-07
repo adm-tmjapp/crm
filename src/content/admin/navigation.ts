@@ -2,37 +2,44 @@ export const adminNavigationItems = [
   {
     label: "Dashboard",
     href: "/admin",
-    icon: "dashboard"
+    icon: "dashboard",
+    group: "Visão geral"
   },
   {
     label: "Motoristas",
     href: "/admin/motoristas",
-    icon: "person"
+    icon: "person",
+    group: "Operação"
   },
   {
     label: "Passageiros",
     href: "/admin/passageiros",
-    icon: "groups"
+    icon: "groups",
+    group: "Operação"
   },
   {
     label: "Corridas",
     href: "/admin/corridas",
-    icon: "directions_car"
+    icon: "directions_car",
+    group: "Operação"
   },
   {
     label: "Pagamentos",
     href: "/admin/pagamentos",
-    icon: "account_balance_wallet"
+    icon: "account_balance_wallet",
+    group: "Financeiro e cadastros"
   },
   {
     label: "Produtos",
     href: "/admin/produtos",
-    icon: "database"
+    icon: "database",
+    group: "Financeiro e cadastros"
   },
   {
-    label: "Aprovação de Documentos",
+    label: "Aprovações",
     href: "/admin/documentos",
-    icon: "fact_check"
+    icon: "fact_check",
+    group: "Financeiro e cadastros"
   }
 ];
 
@@ -40,6 +47,7 @@ export const adminSecondaryNavigationItems = [
   {
     label: "Configurações",
     href: "/admin/configurações",
-    icon: "settings"
+    icon: "settings",
+    group: "Sistema"
   }
 ];

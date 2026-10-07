@@ -198,6 +198,15 @@ export function MaterialIcon({ name, className = "h-6 w-6" }: IconProps) {
           <path d="m6 9 6 6 6-6" />
         </BaseIcon>
       );
+    case "refresh":
+      return (
+        <BaseIcon className={className}>
+          <path d="M20 11a8 8 0 0 0-14.7-4L4 9" />
+          <path d="M4 4v5h5" />
+          <path d="M4 13a8 8 0 0 0 14.7 4L20 15" />
+          <path d="M20 20v-5h-5" />
+        </BaseIcon>
+      );
     default:
       return (
         <BaseIcon className={className}>

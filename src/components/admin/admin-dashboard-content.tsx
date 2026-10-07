@@ -191,7 +191,40 @@ export function AdminDashboardContent() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#cf2f7d]">
+            Visão geral
+          </p>
+          <h1 className="mt-2 text-3xl font-bold tracking-[-0.04em] text-white">
+            Acompanhe sua operação
+          </h1>
+          <p className="mt-2 max-w-2xl text-[15px] text-[#8ea0bd]">
+            Veja o que precisa de atenção e acesse rapidamente as principais áreas da plataforma.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/admin/documentos"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-[#dfe5ef] transition hover:border-[#cf2f7d]/50 hover:bg-white/5"
+          >
+            <MaterialIcon name="fact_check" className="h-5 w-5" />
+            Aprovações
+          </Link>
+          <button
+            type="button"
+            onClick={() => refresh()}
+            disabled={isLoading}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#cf2f7d] px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-wait disabled:opacity-60"
+          >
+            <MaterialIcon name="refresh" className="h-5 w-5" />
+            {isLoading ? "Atualizando..." : "Atualizar dados"}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex justify-start">
         <div className="flex rounded-xl border border-white/10 bg-[#131313] p-1">
           {dashboardPeriods.map((label, index) => {
             const periodValue =

@@ -19,6 +19,8 @@ import {
 import { MaterialIcon } from "@/components/admin/material-icon";
 import { AdminHeaderSheets } from "@/components/admin/admin-header-sheets";
 
+const navigationGroups = ["Visão geral", "Operação", "Financeiro e cadastros"] as const;
+
 export function AdminShell({
   children
 }: Readonly<{
@@ -115,31 +117,43 @@ export function AdminShell({
             </div>
           </div>
 
-          <nav className="px-5 pt-8">
-            <div className="space-y-4">
-              {adminNavigationItems.map((item) => {
-                const active =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-4 rounded-2xl px-6 py-5 text-[18px] font-medium transition ${
-                      active
-                        ? "bg-[#cf2f7d] text-white"
-                        : "text-[#a9b4c8] hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    <MaterialIcon name={item.icon} className="h-7 w-7" />
-                    <span className={item.label.length > 18 ? "max-w-[170px]" : ""}>
-                      {item.label}
-                    </span>
-                  </Link>
-                );
-              })}
+          <nav className="px-5 pt-6" aria-label="Navegação principal">
+            <div className="space-y-7">
+              {navigationGroups.map((group) => (
+                <div key={group}>
+                  <p className="px-6 pb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#71809a]">
+                    {group}
+                  </p>
+                  <div className="space-y-1">
+                    {adminNavigationItems
+                      .filter((item) => item.group === group)
+                      .map((item) => {
+                        const active =
+                          pathname === item.href || pathname.startsWith(`${item.href}/`);
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className={`flex items-center gap-4 rounded-xl px-6 py-3.5 text-[16px] font-semibold transition ${
+                              active
+                                ? "bg-[#cf2f7d] text-white shadow-[0_10px_24px_rgba(207,47,125,0.18)]"
+                                : "text-[#a9b4c8] hover:bg-white/5 hover:text-white"
+                            }`}
+                          >
+                            <MaterialIcon name={item.icon} className="h-6 w-6" />
+                            <span>{item.label}</span>
+                          </Link>
+                        );
+                      })}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <div className="mt-8 border-t border-white/10 pt-8">
+            <div className="mt-8 border-t border-white/10 pt-6">
+              <p className="px-6 pb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#71809a]">
+                Sistema
+              </p>
               {adminSecondaryNavigationItems.map((item) => {
                 const active =
                   pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -147,13 +161,13 @@ export function AdminShell({
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-4 rounded-2xl px-6 py-5 text-[18px] font-medium transition ${
+                    className={`flex items-center gap-4 rounded-xl px-6 py-3.5 text-[16px] font-semibold transition ${
                       active
                         ? "bg-[#cf2f7d] text-white"
                         : "text-[#a9b4c8] hover:bg-white/5 hover:text-white"
                     }`}
                   >
-                    <MaterialIcon name={item.icon} className="h-7 w-7" />
+                    <MaterialIcon name={item.icon} className="h-6 w-6" />
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -182,7 +196,7 @@ export function AdminShell({
                 </span>
                 <input
                   type="text"
-                  placeholder="Pesquisar dados, motoristas ou transações..."
+                  placeholder="Buscar motorista, passageiro ou corrida..."
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
