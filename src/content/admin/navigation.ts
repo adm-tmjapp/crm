@@ -55,5 +55,11 @@ export const adminSecondaryNavigationItems = [
     href: "/admin/configurações",
     icon: "settings",
     group: "Sistema"
+  },
+  {
+    label: "Auditoria",
+    href: "/admin/auditoria",
+    icon: "fact_check",
+    group: "Sistema"
   }
 ];

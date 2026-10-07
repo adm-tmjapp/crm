@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
+import { MaterialIcon } from "@/components/admin/material-icon";
 import {
   AdminEmptyState,
   AdminErrorState,
@@ -133,7 +135,7 @@ function StatCard({
 
 export function AdminSettingsPage({
   initialSection = "produtos",
-  sections = ["produtos", "auditoria"]
+  sections = []
 }: {
   initialSection?: SettingsSection;
   sections?: SettingsSection[];
@@ -409,8 +411,32 @@ export function AdminSettingsPage({
         </div>
       ) : null}
       {loading ? <AdminLoadingState label="Carregando configurações..." /> : null}
-      {!loading && !products.length && !tarifas.length ? (
+      {!loading && sections.length > 0 && !products.length && !tarifas.length ? (
         <AdminEmptyState label="Nenhuma configuração disponível." />
+      ) : null}
+
+      {!loading && !sections.length ? (
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            ["Tarifas", "Defina valores e regras das corridas.", "/admin/tarifas", "payments"],
+            ["Produtos", "Gerencie os tipos de corrida.", "/admin/produtos", "database"],
+            ["Pagamentos", "Configure PIX, cartão e ASAAS.", "/admin/pagamentos", "account_balance_wallet"],
+            ["Auditoria", "Consulte alterações feitas no painel.", "/admin/auditoria", "fact_check"]
+          ].map(([label, helper, href, icon]) => (
+            <Link
+              key={href}
+              href={href}
+              className="rounded-2xl border border-white/10 bg-[#111111] p-5 transition hover:border-[#cf2f7d]/50 hover:bg-[#171717]"
+            >
+              <MaterialIcon name={icon} className="h-7 w-7 text-[#cf2f7d]" />
+              <h2 className="mt-4 text-lg font-semibold text-white">{label}</h2>
+              <p className="mt-2 text-sm leading-6 text-[#8ea0bd]">{helper}</p>
+              <span className="mt-5 inline-block text-sm font-semibold text-[#cf2f7d]">
+                Acessar →
+              </span>
+            </Link>
+          ))}
+        </section>
       ) : null}
 
       {!loading ? (
