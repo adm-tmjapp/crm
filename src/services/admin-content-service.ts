@@ -202,6 +202,27 @@ export type AdminPayment = {
   createdAt?: string | null;
 };
 
+export type AdminDriverWithdrawal = {
+  id: string;
+  amount: number;
+  status?: string | null;
+  pixKeyType?: string | null;
+  pixKeyMasked?: string | null;
+  providerTxId?: string | null;
+  providerStatus?: string | null;
+  failureReason?: string | null;
+  rejectionReason?: string | null;
+  createdAt?: string | null;
+  reviewedAt?: string | null;
+  completedAt?: string | null;
+  driver?: {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+  } | null;
+};
+
 export type PaymentScopeType = "GLOBAL" | "CITY" | "PRODUCT" | "OPERATION";
 export type PaymentMethod = "PIX" | "CREDIT_CARD" | "CASH";
 
@@ -502,6 +523,33 @@ export async function listPayments(params?: {
   }>(`/admin/payments?${search.toString()}`);
 
   return payload.data || { payments: [], total: 0, page: 1, limit: 20 };
+}
+
+export async function listDriverWithdrawals(params?: { status?: string; page?: number; limit?: number }) {
+  const search = new URLSearchParams();
+  search.set("page", String(params?.page || 1));
+  search.set("limit", String(params?.limit || 50));
+  if (params?.status) search.set("status", params.status);
+  return fetchJson<{
+    success: boolean;
+    items: AdminDriverWithdrawal[];
+    total: number;
+    page: number;
+    limit: number;
+  }>(`/admin/driver-withdrawals?${search.toString()}`);
+}
+
+export async function approveDriverWithdrawal(id: string) {
+  return fetchJson<{ success: boolean; transfer: AdminDriverWithdrawal }>(`/admin/driver-withdrawals/${id}/approve`, {
+    method: "PUT"
+  });
+}
+
+export async function rejectDriverWithdrawal(id: string, reason: string) {
+  return fetchJson<{ success: boolean; transfer: AdminDriverWithdrawal }>(`/admin/driver-withdrawals/${id}/reject`, {
+    method: "PUT",
+    body: JSON.stringify({ reason })
+  });
 }
 
 export async function getPaymentSettings(params?: {
