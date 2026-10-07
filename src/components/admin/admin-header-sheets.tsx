@@ -32,6 +32,8 @@ const initialNotifications = [
   }
 ];
 
+const notificationsStorageKey = "tmjapp_admin_notifications";
+
 const conversations = [
   { id: 1, name: "Mariana Souza", role: "Motorista", preview: "Preciso de ajuda com meu cadastro.", time: "10:42" },
   { id: 2, name: "Rafael Lima", role: "Passageiro", preview: "Obrigado pelo atendimento!", time: "09:18" },
@@ -40,12 +42,25 @@ const conversations = [
 
 export function AdminHeaderSheets() {
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const [notifications, setNotifications] = useState(() => {
+    if (typeof window === "undefined") return initialNotifications;
+
+    try {
+      const stored = window.localStorage.getItem(notificationsStorageKey);
+      return stored ? JSON.parse(stored) : initialNotifications;
+    } catch {
+      return initialNotifications;
+    }
+  });
   const [activeConversation, setActiveConversation] = useState(conversations[0]);
   const [message, setMessage] = useState("");
   const [sentMessages, setSentMessages] = useState<string[]>([]);
   const panelRef = useRef<HTMLElement>(null);
   const unreadCount = notifications.filter((item) => item.unread).length;
+
+  useEffect(() => {
+    window.localStorage.setItem(notificationsStorageKey, JSON.stringify(notifications));
+  }, [notifications]);
 
   useEffect(() => {
     if (!openSheet) return;
