@@ -117,8 +117,8 @@ export default function AdminRidesPage() {
   const limit = 12;
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (options: { silent?: boolean } = {}) => {
+    if (!options.silent) setLoading(true);
     setError("");
     try {
       const payload = await listRides({
@@ -149,6 +149,14 @@ export default function AdminRidesPage() {
     }, 300);
 
     return () => window.clearTimeout(timeout);
+  }, [load]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      load({ silent: true });
+    }, 15_000);
+
+    return () => window.clearInterval(interval);
   }, [load]);
 
   async function handleDelete(ids: string[]) {
