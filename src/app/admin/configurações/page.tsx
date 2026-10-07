@@ -44,6 +44,8 @@ type ProductDraft = {
   taxaId: string;
 };
 
+export type SettingsSection = "tarifas" | "produtos" | "auditoria";
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -129,7 +131,13 @@ function StatCard({
   );
 }
 
-export default function AdminSettingsPage() {
+export function AdminSettingsPage({
+  initialSection = "produtos",
+  sections = ["produtos", "auditoria"]
+}: {
+  initialSection?: SettingsSection;
+  sections?: SettingsSection[];
+}) {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [tarifas, setTarifas] = useState<AdminTarifa[]>([]);
   const [logs, setLogs] = useState<AdminAuditLog[]>([]);
@@ -146,6 +154,7 @@ export default function AdminSettingsPage() {
   const [savingProduct, setSavingProduct] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
 
   useEffect(() => {
     async function load() {
@@ -361,8 +370,38 @@ export default function AdminSettingsPage() {
   return (
     <AdminPageShell
       title="Configurações"
-      description="Estrutura de tarifação com regras, valores-base, simulador de cálculo e visão operacional das tarifas em vigor."
+      description="Escolha uma área para ajustar tarifas, produtos ou consultar alterações."
     >
+      <nav
+        aria-label="Áreas de configuração"
+        className="mb-6 grid gap-2 rounded-2xl border border-white/10 bg-[#111111] p-2 md:grid-cols-3"
+      >
+        {[
+          ["tarifas", "Tarifas", "Valores usados no cálculo das corridas"],
+          ["produtos", "Produtos", "Tipos de corrida disponíveis"],
+          ["auditoria", "Histórico", "Alterações feitas no painel"]
+        ].filter(([value]) => sections.includes(value as SettingsSection)).map(([value, label, helper]) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setActiveSection(value as SettingsSection)}
+            className={`rounded-xl px-4 py-3 text-left transition ${
+              activeSection === value
+                ? "bg-[#cf2f7d] text-white"
+                : "text-[#aeb7c8] hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            <span className="block text-sm font-bold">{label}</span>
+            <span
+              className={`mt-1 block text-xs ${
+                activeSection === value ? "text-white/75" : "text-[#71809a]"
+              }`}
+            >
+              {helper}
+            </span>
+          </button>
+        ))}
+      </nav>
       {error ? <AdminErrorState message={error} /> : null}
       {successMessage ? (
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-5 py-4 text-sm text-emerald-100">
@@ -375,14 +414,18 @@ export default function AdminSettingsPage() {
       ) : null}
 
       {!loading ? (
-        <section className="grid gap-6 2xl:grid-cols-[0.72fr_1.28fr]">
+        <section
+          className={`grid gap-6 2xl:grid-cols-[0.72fr_1.28fr] ${
+            activeSection === "tarifas" ? "" : "hidden"
+          }`}
+        >
           <div className="space-y-6">
             <article className="overflow-hidden rounded-[20px] border border-white/10 bg-[#111111]">
               <div className="border-b border-white/10 px-5 py-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h2 className="text-[18px] font-semibold text-white">
-                      Regras de Tarifação
+                      Tarifas
                     </h2>
                     <p className="mt-1 text-[13px] text-[#8ea0bd]">
                       Escolha a regra para revisar os valores usados no cálculo da corrida.
@@ -463,7 +506,7 @@ export default function AdminSettingsPage() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="text-[18px] font-semibold text-white">
-                    Estrutura de cálculo
+                      Editar tarifa
                   </h2>
                   <p className="mt-1 text-[13px] text-[#8ea0bd]">
                     Formulario base para organizar os valores cobrados junto ao cálculo.
@@ -650,12 +693,16 @@ export default function AdminSettingsPage() {
       ) : null}
 
       {!loading ? (
-        <div className="grid gap-6 xl:grid-cols-2">
-          <section className="rounded-[20px] border border-white/10 bg-[#111111] p-5">
+        <div className={`grid gap-6 xl:grid-cols-2 ${activeSection === "tarifas" ? "hidden" : ""}`}>
+          <section
+            className={`rounded-[20px] border border-white/10 bg-[#111111] p-5 ${
+              activeSection === "produtos" ? "xl:col-span-2" : "hidden"
+            }`}
+          >
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-[18px] font-semibold text-white">
-                  Tipos de corrida
+                  Produtos
                 </h2>
                 <p className="mt-1 text-[13px] text-[#8ea0bd]">
                   Cadastre produtos como X, Confort e Premium e vincule cada um a uma tarifa.
@@ -785,9 +832,13 @@ export default function AdminSettingsPage() {
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-[20px] border border-white/10 bg-[#111111]">
+          <section
+            className={`overflow-hidden rounded-[20px] border border-white/10 bg-[#111111] ${
+              activeSection === "auditoria" ? "xl:col-span-2" : "hidden"
+            }`}
+          >
             <div className="border-b border-white/10 px-5 py-4 text-[18px] font-semibold text-white">
-              Auditoria recente
+              Histórico de alterações
             </div>
             <div className="divide-y divide-white/10">
               {logs.length ? (
@@ -819,4 +870,8 @@ export default function AdminSettingsPage() {
       ) : null}
     </AdminPageShell>
   );
+}
+
+export default function AdminSettingsPageRoute() {
+  return <AdminSettingsPage />;
 }

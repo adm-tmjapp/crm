@@ -5,7 +5,16 @@ import { MaterialIcon } from "@/components/admin/material-icon";
 
 type OpenSheet = "notifications" | "messages" | null;
 
-const initialNotifications = [
+type AdminNotification = {
+  id: number;
+  title: string;
+  description: string;
+  time: string;
+  unread: boolean;
+  icon: string;
+};
+
+const initialNotifications: AdminNotification[] = [
   {
     id: 1,
     title: "Novo motorista aguardando aprovação",
@@ -42,7 +51,7 @@ const conversations = [
 
 export function AdminHeaderSheets() {
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
-  const [notifications, setNotifications] = useState(() => {
+  const [notifications, setNotifications] = useState<AdminNotification[]>(() => {
     if (typeof window === "undefined") return initialNotifications;
 
     try {

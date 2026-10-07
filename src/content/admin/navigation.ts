@@ -30,6 +30,12 @@ export const adminNavigationItems = [
     group: "Financeiro e cadastros"
   },
   {
+    label: "Tarifas",
+    href: "/admin/tarifas",
+    icon: "payments",
+    group: "Financeiro e cadastros"
+  },
+  {
     label: "Produtos",
     href: "/admin/produtos",
     icon: "database",
