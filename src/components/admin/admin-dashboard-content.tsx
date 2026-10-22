@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   dashboardPeriods,
-  dashboardStats,
-  revenueLabels
+  dashboardStats
 } from "@/content/admin/dashboard";
 import { MaterialIcon } from "@/components/admin/material-icon";
 import {
@@ -30,13 +29,14 @@ function buildChartPath(values: number[]) {
   if (!values.length) return "";
 
   const width = 1000;
-  const height = 320;
+  const height = 300;
+  const maxValue = Math.max(...values, 1);
   const stepX = width / (values.length - 1);
 
   return values
     .map((value, index) => {
       const x = Math.round(index * stepX);
-      const y = Math.round(height - value * 3.2);
+      const y = Math.round(20 + (height - 20) * (1 - value / maxValue));
       return `${index === 0 ? "M" : "L"} ${x} ${y}`;
     })
     .join(" ");
@@ -69,6 +69,8 @@ function ApprovalActions({
     <div className="flex items-center gap-3">
       <button
         onClick={onApprove}
+        aria-label="Aprovar pendência"
+        title="Aprovar pendência"
         disabled={busy}
         className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#03271c] text-[#0bd38a] transition hover:brightness-110 disabled:opacity-50"
       >
@@ -76,6 +78,8 @@ function ApprovalActions({
       </button>
       <button
         onClick={onReject}
+        aria-label="Rejeitar pendência"
+        title="Rejeitar pendência"
         disabled={busy}
         className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2c1013] text-[#ff5a63] transition hover:brightness-110 disabled:opacity-50"
       >
@@ -180,8 +184,11 @@ export function AdminDashboardContent() {
     }
   }
 
-  const revenueSeries = data?.revenueSeries || [0, 0, 0, 0, 0, 0, 0];
-  const areaPath = `${buildChartPath(revenueSeries)} L 1000 320 L 0 320 Z`;
+  const revenueSeries =
+    data?.revenueSeries ||
+    Array.from({ length: 7 }, (_, index) => ({ label: `Ponto ${index + 1}`, value: 0 }));
+  const revenueValues = revenueSeries.map((point) => point.value);
+  const areaPath = `${buildChartPath(revenueValues)} L 1000 300 L 0 300 Z`;
   const statValues = [
     formatCurrency(data?.stats.totalRevenue || 0),
     new Intl.NumberFormat("pt-BR").format(data?.stats.activeDrivers || 0),
@@ -276,6 +283,15 @@ export function AdminDashboardContent() {
               <h2 className="mt-2 text-[24px] font-bold tracking-[-0.03em] text-white">
                 {isLoading ? "--" : statValues[index]}
               </h2>
+              <p className="mt-2 text-xs text-[#71809a]">
+                {index === 0
+                  ? "No período selecionado"
+                  : index === 1
+                    ? "Total atual"
+                    : index === 2
+                      ? `${data?.stats.newPassengers || 0} novos no período`
+                      : "Documentos e veículos"}
+              </p>
             </div>
           </Link>
         ))}
@@ -298,10 +314,12 @@ export function AdminDashboardContent() {
         </div>
 
         <div className="overflow-hidden rounded-[16px]">
-          <svg
+            <svg
             viewBox="0 0 1000 360"
             className="h-[360px] w-full"
             preserveAspectRatio="none"
+              role="img"
+              aria-label="Gráfico de crescimento de receita por período"
           >
             <defs>
               <linearGradient id="revenueArea" x1="0" x2="0" y1="0" y2="1">
@@ -315,8 +333,8 @@ export function AdminDashboardContent() {
                 key={line}
                 x1="0"
                 x2="1000"
-                y1={line}
-                y2={line}
+                y1={line - 20}
+                y2={line - 20}
                 stroke="#41506b"
                 strokeDasharray="5 6"
                 opacity="0.9"
@@ -325,19 +343,29 @@ export function AdminDashboardContent() {
 
             <path d={areaPath} fill="url(#revenueArea)" />
             <path
-              d={buildChartPath(revenueSeries)}
+              d={buildChartPath(revenueValues)}
               fill="none"
               stroke="#cf2f7d"
               strokeWidth="5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
+            {revenueSeries.map((point, index) => {
+              const x = revenueSeries.length > 1 ? (index * 1000) / (revenueSeries.length - 1) : 0;
+              const maxValue = Math.max(...revenueValues, 1);
+              const y = 20 + 280 * (1 - point.value / maxValue);
+              return (
+                <circle key={`${point.label}-${index}`} cx={x} cy={y} r="7" fill="#cf2f7d">
+                  <title>{`${point.label}: ${formatCurrency(point.value)}`}</title>
+                </circle>
+              );
+            })}
           </svg>
         </div>
 
         <div className="mt-2 grid grid-cols-7 px-2 text-[13px] text-[#7c8aa3]">
-          {revenueLabels.map((label) => (
-            <span key={label}>{label}</span>
+          {revenueSeries.map((point) => (
+            <span key={point.label}>{point.label}</span>
           ))}
         </div>
       </section>

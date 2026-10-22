@@ -196,6 +196,7 @@ export function AdminShell({
                 </span>
                 <input
                   type="text"
+                  aria-label="Buscar motorista, passageiro ou corrida"
                   placeholder="Buscar motorista, passageiro ou corrida..."
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}

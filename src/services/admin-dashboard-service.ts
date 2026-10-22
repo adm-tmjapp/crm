@@ -4,13 +4,23 @@ import { getAdminSession } from "@/lib/auth";
 type DashboardPeriod = "monthly" | "biweekly" | "weekly";
 
 type DashboardResponse = {
+  period?: {
+    key?: DashboardPeriod;
+    startDate?: string;
+    endDate?: string;
+    timezone?: string;
+  };
+  updatedAt?: string;
   stats?: {
     totalRevenue?: number;
     activeDrivers?: number;
     totalPassengers?: number;
+    newPassengers?: number;
+    completedRides?: number;
+    averageRideValue?: number;
     pendingApprovals?: number;
   };
-  revenueSeries?: number[];
+  revenueSeries?: Array<{ label?: string; value?: number }>;
   pendingDrivers?: Array<{
     id: string;
     type?: string;
@@ -38,13 +48,23 @@ type DashboardResponse = {
 };
 
 export type DashboardData = {
+  period: {
+    key: DashboardPeriod;
+    startDate: string;
+    endDate: string;
+    timezone: string;
+  };
+  updatedAt: string;
   stats: {
     totalRevenue: number;
     activeDrivers: number;
     totalPassengers: number;
+    newPassengers: number;
+    completedRides: number;
+    averageRideValue: number;
     pendingApprovals: number;
   };
-  revenueSeries: number[];
+  revenueSeries: Array<{ label: string; value: number }>;
   pendingDrivers: Array<{
     id: string;
     name: string;
@@ -87,22 +107,32 @@ async function fetchJson<T>(path: string) {
   return payload as T;
 }
 
-function normalizeSeries(values?: number[]) {
-  const source = Array.isArray(values) && values.length ? values : [0, 0, 0, 0, 0, 0, 0];
-  if (source.length === 7) return source;
-
-  const next = Array.from({ length: 7 }, (_, index) => Number(source[index] || 0));
-  return next;
+function normalizeSeries(values?: Array<{ label?: string; value?: number }>) {
+  const source = Array.isArray(values) ? values : [];
+  return Array.from({ length: 7 }, (_, index) => ({
+    label: source[index]?.label || `Ponto ${index + 1}`,
+    value: Number(source[index]?.value || 0),
+  }));
 }
 
 export async function loadAdminDashboardData(period: DashboardPeriod): Promise<DashboardData> {
   const payload = await fetchJson<DashboardResponse>(`/admin/dashboard?period=${period}`);
 
   return {
+    period: {
+      key: payload.period?.key || period,
+      startDate: payload.period?.startDate || new Date().toISOString(),
+      endDate: payload.period?.endDate || new Date().toISOString(),
+      timezone: payload.period?.timezone || "America/Recife",
+    },
+    updatedAt: payload.updatedAt || new Date().toISOString(),
     stats: {
       totalRevenue: Number(payload.stats?.totalRevenue || 0),
       activeDrivers: Number(payload.stats?.activeDrivers || 0),
       totalPassengers: Number(payload.stats?.totalPassengers || 0),
+      newPassengers: Number(payload.stats?.newPassengers || 0),
+      completedRides: Number(payload.stats?.completedRides || 0),
+      averageRideValue: Number(payload.stats?.averageRideValue || 0),
       pendingApprovals: Number(payload.stats?.pendingApprovals || 0)
     },
     revenueSeries: normalizeSeries(payload.revenueSeries),
