@@ -213,6 +213,20 @@ export function AdminDashboardContent() {
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
+            href="/admin/produtos"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-[#dfe5ef] transition hover:border-[#cf2f7d]/50 hover:bg-white/5"
+          >
+            <MaterialIcon name="local_taxi" className="h-5 w-5" />
+            Tipos de viagem
+          </Link>
+          <Link
+            href="/admin/tarifas"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-[#dfe5ef] transition hover:border-[#cf2f7d]/50 hover:bg-white/5"
+          >
+            <MaterialIcon name="payments" className="h-5 w-5" />
+            Tarifas
+          </Link>
+          <Link
             href="/admin/documentos"
             className="inline-flex items-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-[#dfe5ef] transition hover:border-[#cf2f7d]/50 hover:bg-white/5"
           >

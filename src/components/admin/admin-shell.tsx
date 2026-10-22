@@ -19,7 +19,13 @@ import {
 import { MaterialIcon } from "@/components/admin/material-icon";
 import { AdminHeaderSheets } from "@/components/admin/admin-header-sheets";
 
-const navigationGroups = ["Visão geral", "Operação", "Financeiro e cadastros"] as const;
+const navigationGroups = [
+  "Visão geral",
+  "Operação",
+  "Oferta de transporte",
+  "Financeiro",
+  "Segurança e cadastros"
+] as const;
 
 export function AdminShell({
   children

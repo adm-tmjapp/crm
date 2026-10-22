@@ -274,6 +274,7 @@ export type AdminProduct = {
   name?: string;
   icon?: string;
   taxaId?: string;
+  active?: boolean;
 };
 
 export type AdminTarifa = {
@@ -285,6 +286,7 @@ export type AdminTarifa = {
   valorKm?: number;
   custoFixo?: number;
   taxaIntermediacao?: number;
+  status?: boolean;
 };
 
 export type SmsUsage = {
@@ -617,6 +619,7 @@ export async function createProduct(input: {
   name: string;
   icon?: string;
   taxaId?: string | null;
+  active?: boolean;
 }) {
   return fetchJson<AdminProduct>("/admin/products", {
     method: "POST",
@@ -630,6 +633,7 @@ export async function updateProduct(
     name: string;
     icon?: string;
     taxaId?: string | null;
+    active?: boolean;
   }
 ) {
   return fetchJson<AdminProduct>(`/admin/products/${productId}`, {
@@ -664,6 +668,7 @@ export async function createTarifa(input: {
   valorKm?: number;
   custoFixo?: number;
   taxaIntermediacao?: number;
+  status?: boolean;
 }) {
   return fetchJson<AdminTarifa>("/admin/tarifas", {
     method: "POST",
@@ -681,6 +686,7 @@ export async function updateTarifa(
     valorKm?: number;
     custoFixo?: number;
     taxaIntermediacao?: number;
+  status?: boolean;
   }
 ) {
   return fetchJson<AdminTarifa>(`/admin/tarifas/${tarifaId}`, {

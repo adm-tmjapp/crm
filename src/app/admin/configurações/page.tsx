@@ -44,6 +44,7 @@ type ProductDraft = {
   name: string;
   icon: string;
   taxaId: string;
+  active: boolean;
 };
 
 export type SettingsSection = "tarifas" | "produtos" | "auditoria";
@@ -73,7 +74,7 @@ function toDraft(tarifa?: AdminTarifa): PricingDraft {
     taxaIntermediacao: Number(tarifa?.taxaIntermediacao || 0),
     vigenciaInicio: formatDateInput(tarifa?.vigenciaInicio),
     vigenciaFim: formatDateInput(tarifa?.vigenciaFim),
-    status: true
+    status: tarifa?.status !== false
   };
 }
 
@@ -149,7 +150,8 @@ export function AdminSettingsPage({
   const [productDraft, setProductDraft] = useState<ProductDraft>({
     name: "",
     icon: "",
-    taxaId: ""
+    taxaId: "",
+    active: true
   });
   const [loading, setLoading] = useState(true);
   const [savingTarifa, setSavingTarifa] = useState(false);
@@ -239,7 +241,8 @@ export function AdminSettingsPage({
       id: product._id,
       name: product.name || "",
       icon: product.icon || "",
-      taxaId: product.taxaId || ""
+      taxaId: product.taxaId || "",
+      active: product.active !== false
     });
   }
 
@@ -247,7 +250,8 @@ export function AdminSettingsPage({
     setProductDraft({
       name: "",
       icon: "",
-      taxaId: ""
+      taxaId: "",
+      active: true
     });
   }
 
@@ -265,7 +269,8 @@ export function AdminSettingsPage({
       const payload = {
         name: productDraft.name.trim(),
         icon: productDraft.icon.trim() || undefined,
-        taxaId: productDraft.taxaId || undefined
+        taxaId: productDraft.taxaId || undefined,
+        active: productDraft.active
       };
 
       if (!payload.name) {
@@ -303,7 +308,8 @@ export function AdminSettingsPage({
         custoFixo: draft.custoFixo,
         taxaIntermediacao: draft.taxaIntermediacao,
         vigenciaInicio: draft.vigenciaInicio || undefined,
-        vigenciaFim: draft.vigenciaFim || undefined
+        vigenciaFim: draft.vigenciaFim || undefined,
+        status: draft.status
       };
 
       if (selectedTarifaId) {
@@ -335,13 +341,16 @@ export function AdminSettingsPage({
 
     try {
       await deleteTarifa(selectedTarifaId);
-      setTarifas((current) => current.filter((tarifa) => tarifa._id !== selectedTarifaId));
-      setSelectedTarifaId("");
-      setDraft(toDraft());
-      setSuccessMessage("Tarifa removida com sucesso.");
+      setTarifas((current) =>
+        current.map((tarifa) =>
+          tarifa._id === selectedTarifaId ? { ...tarifa, status: false } : tarifa
+        )
+      );
+      setDraft((current) => ({ ...current, status: false }));
+      setSuccessMessage("Tarifa desativada. O histórico foi preservado.");
     } catch (actionError) {
       setError(
-        actionError instanceof Error ? actionError.message : "Falha ao remover tarifa."
+        actionError instanceof Error ? actionError.message : "Falha ao desativar tarifa."
       );
     } finally {
       setSavingTarifa(false);
@@ -629,7 +638,7 @@ export function AdminSettingsPage({
                       disabled={savingTarifa}
                       className="rounded-xl border border-[#3b1519] px-4 py-2.5 text-[13px] font-semibold text-[#ff7b8a] disabled:opacity-50"
                     >
-                      Remover tarifa
+                      Desativar tarifa
                     </button>
                   ) : null}
                   <button
@@ -784,6 +793,23 @@ export function AdminSettingsPage({
                     </option>
                   ))}
                 </select>
+              </label>
+
+              <label className="flex items-center justify-between rounded-xl border border-white/10 bg-black px-4 py-3.5">
+                <div>
+                  <p className="text-[14px] font-medium text-white">Disponível para passageiros</p>
+                  <p className="mt-1 text-[12px] text-[#7c8aa3]">
+                    Desative para ocultar novas solicitações sem apagar o histórico.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={productDraft.active}
+                  onChange={(event) =>
+                    setProductDraft((current) => ({ ...current, active: event.target.checked }))
+                  }
+                  className="h-5 w-5 rounded border-white/20 bg-black accent-[#cf2f7d]"
+                />
               </label>
 
               <div className="flex flex-wrap gap-3">

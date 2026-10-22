@@ -27,31 +27,31 @@ export const adminNavigationItems = [
     label: "Pagamentos",
     href: "/admin/pagamentos",
     icon: "account_balance_wallet",
-    group: "Financeiro e cadastros"
+    group: "Financeiro"
   },
   {
     label: "Saques de motoristas",
     href: "/admin/saques-motoristas",
     icon: "payments",
-    group: "Financeiro e cadastros"
+    group: "Financeiro"
   },
   {
     label: "Tarifas",
     href: "/admin/tarifas",
     icon: "payments",
-    group: "Financeiro e cadastros"
+    group: "Oferta de transporte"
   },
   {
-    label: "Produtos",
+    label: "Tipos de viagem",
     href: "/admin/produtos",
-    icon: "database",
-    group: "Financeiro e cadastros"
+    icon: "local_taxi",
+    group: "Oferta de transporte"
   },
   {
     label: "Aprovações",
     href: "/admin/documentos",
     icon: "fact_check",
-    group: "Financeiro e cadastros"
+    group: "Segurança e cadastros"
   }
 ];
 

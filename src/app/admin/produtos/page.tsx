@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import {
   AdminEmptyState,
@@ -9,7 +9,6 @@ import {
 } from "@/components/admin/admin-state";
 import {
   createProduct,
-  deleteProduct,
   listProducts,
   listTarifas,
   updateProduct,
@@ -22,7 +21,10 @@ type ProductDraft = {
   name: string;
   icon: string;
   taxaId: string;
+  active: boolean;
 };
+
+type ProductFilter = "all" | "active" | "inactive";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -38,12 +40,22 @@ export default function AdminProductsPage() {
   const [draft, setDraft] = useState<ProductDraft>({
     name: "",
     icon: "",
-    taxaId: ""
+    taxaId: "",
+    active: true
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [productFilter, setProductFilter] = useState<ProductFilter>("all");
+
+  const filteredProducts = useMemo(
+    () => products.filter((product) => {
+      const isActive = product.active !== false;
+      return productFilter === "all" || (productFilter === "active" ? isActive : !isActive);
+    }),
+    [productFilter, products]
+  );
 
   async function load() {
     setLoading(true);
@@ -73,7 +85,8 @@ export default function AdminProductsPage() {
     setDraft({
       name: "",
       icon: "",
-      taxaId: ""
+      taxaId: "",
+      active: true
     });
   }
 
@@ -82,7 +95,8 @@ export default function AdminProductsPage() {
       id: product._id,
       name: product.name || "",
       icon: product.icon || "",
-      taxaId: product.taxaId || ""
+      taxaId: product.taxaId || "",
+      active: product.active !== false
     });
   }
 
@@ -95,7 +109,8 @@ export default function AdminProductsPage() {
       const payload = {
         name: draft.name.trim(),
         icon: draft.icon.trim() || undefined,
-        taxaId: draft.taxaId || undefined
+        taxaId: draft.taxaId || undefined,
+        active: draft.active
       };
 
       if (!payload.name) {
@@ -121,21 +136,27 @@ export default function AdminProductsPage() {
     }
   }
 
-  async function handleDelete(productId: string) {
+  async function handleToggle(product: AdminProduct) {
     setSaving(true);
     setError("");
     setSuccessMessage("");
 
     try {
-      await deleteProduct(productId);
-      setSuccessMessage("Produto removido com sucesso.");
-      if (draft.id === productId) {
-        resetDraft();
-      }
+      await updateProduct(product._id, {
+        name: product.name || "",
+        icon: product.icon,
+        taxaId: product.taxaId,
+        active: product.active === false
+      });
+      setSuccessMessage(
+        product.active === false
+          ? "Tipo de viagem ativado para novas solicitações."
+          : "Tipo de viagem desativado para novas solicitações."
+      );
       await load();
     } catch (actionError) {
       setError(
-        actionError instanceof Error ? actionError.message : "Falha ao remover produto."
+        actionError instanceof Error ? actionError.message : "Falha ao alterar disponibilidade."
       );
     } finally {
       setSaving(false);
@@ -144,8 +165,8 @@ export default function AdminProductsPage() {
 
   return (
     <AdminPageShell
-      title="Produtos"
-      description="Cadastre os tipos de corrida disponiveis, como X, Confort e Premium, vinculando cada um a uma tarifa."
+      title="Tipos de viagem"
+      description="Publique ou oculte as opções que o passageiro pode escolher e vincule cada uma à sua regra de tarifa."
     >
       {error ? <AdminErrorState message={error} /> : null}
       {successMessage ? (
@@ -159,9 +180,9 @@ export default function AdminProductsPage() {
           <section className="rounded-[24px] border border-white/10 bg-[#111111] p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-[20px] font-semibold text-white">Novo tipo de corrida</h2>
+                <h2 className="text-[20px] font-semibold text-white">Configurar tipo de viagem</h2>
                 <p className="mt-1 text-[14px] text-[#8ea0bd]">
-                  Configure o nome comercial, icone e tarifa usada no cálculo.
+                  O tipo ativo aparece para passageiros elegíveis. Desativar não apaga o histórico.
                 </p>
               </div>
               {draft.id ? (
@@ -189,6 +210,19 @@ export default function AdminProductsPage() {
                 />
               </label>
 
+              <label className="flex items-center justify-between rounded-xl border border-white/10 bg-black px-4 py-3.5">
+                <span>
+                  <span className="block text-[14px] font-medium text-white">Disponível para passageiros</span>
+                  <span className="mt-1 block text-[12px] text-[#7c8aa3]">Permite novas solicitações nesta categoria.</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={draft.active}
+                  onChange={(event) => setDraft((current) => ({ ...current, active: event.target.checked }))}
+                  className="h-5 w-5 rounded border-white/20 bg-black accent-[#cf2f7d]"
+                />
+              </label>
+
               <label className="block">
                 <FieldLabel>Icone</FieldLabel>
                 <input
@@ -212,7 +246,7 @@ export default function AdminProductsPage() {
                   className="w-full rounded-xl border border-white/10 bg-black px-3.5 py-3 text-[14px] text-white outline-none"
                 >
                   <option value="">Selecione uma tarifa</option>
-                  {tarifas.map((tarifa) => (
+                  {tarifas.filter((tarifa) => tarifa.status !== false).map((tarifa) => (
                     <option key={tarifa._id} value={tarifa._id}>
                       {tarifa.name || tarifa._id}
                     </option>
@@ -234,15 +268,30 @@ export default function AdminProductsPage() {
           </section>
 
           <section className="rounded-[24px] border border-white/10 bg-[#111111] p-6">
-            <h2 className="text-[20px] font-semibold text-white">Produtos cadastrados</h2>
-            <p className="mt-1 text-[14px] text-[#8ea0bd]">
-              Use está lista para revisar e editar rapidamente os tipos de corrida.
-            </p>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="text-[20px] font-semibold text-white">Tipos cadastrados</h2>
+                <p className="mt-1 text-[14px] text-[#8ea0bd]">
+                  Publique, oculte ou edite as opções oferecidas ao passageiro.
+                </p>
+              </div>
+              <select
+                value={productFilter}
+                onChange={(event) => setProductFilter(event.target.value as ProductFilter)}
+                className="rounded-lg border border-white/10 bg-black px-3 py-2 text-[12px] text-white outline-none"
+                aria-label="Filtrar tipos de viagem"
+              >
+                <option value="all">Todos ({products.length})</option>
+                <option value="active">Ativos ({products.filter((product) => product.active !== false).length})</option>
+                <option value="inactive">Inativos ({products.filter((product) => product.active === false).length})</option>
+              </select>
+            </div>
 
             <div className="mt-5 space-y-3">
-              {products.length ? (
-                products.map((product) => {
+              {filteredProducts.length ? (
+                filteredProducts.map((product) => {
                   const linkedTarifa = tarifas.find((tarifa) => tarifa._id === product.taxaId);
+                  const isActive = product.active !== false;
 
                   return (
                     <div
@@ -254,11 +303,14 @@ export default function AdminProductsPage() {
                           {product.name || "Produto sem nome"}
                         </p>
                         <p className="mt-1 text-[13px] text-[#8ea0bd]">
-                          Icone: {product.icon || "-"} • Tarifa:{" "}
+                          {isActive ? "Disponível" : "Oculto"} • Ícone: {product.icon || "-"} • Tarifa:{" "}
                           {linkedTarifa?.name || product.taxaId || "-"}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
+                        <span className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold ${isActive ? "bg-emerald-500/15 text-emerald-300" : "bg-white/10 text-[#9aa8c1]"}`}>
+                          {isActive ? "ATIVO" : "INATIVO"}
+                        </span>
                         <button
                           type="button"
                           onClick={() => startEdit(product)}
@@ -268,18 +320,18 @@ export default function AdminProductsPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleDelete(product._id)}
+                          onClick={() => handleToggle(product)}
                           disabled={saving}
-                          className="rounded-lg bg-[#2c1013] px-3 py-2 text-[12px] text-[#ff7b8a] disabled:opacity-50"
+                          className={`rounded-lg px-3 py-2 text-[12px] disabled:opacity-50 ${isActive ? "bg-[#2c1013] text-[#ff7b8a]" : "bg-[#03271c] text-[#0bd38a]"}`}
                         >
-                          Excluir
+                          {isActive ? "Desativar" : "Ativar"}
                         </button>
                       </div>
                     </div>
                   );
                 })
               ) : (
-                <AdminEmptyState label="Nenhum produto cadastrado ainda." />
+                <AdminEmptyState label={products.length ? "Nenhum tipo encontrado neste filtro." : "Nenhum tipo de viagem cadastrado ainda."} />
               )}
             </div>
           </section>
