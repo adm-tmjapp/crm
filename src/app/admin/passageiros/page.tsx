@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import {
   AdminEmptyState,
@@ -99,6 +98,25 @@ export default function AdminPassengersPage() {
     } finally {
       setDetailsLoading(false);
     }
+  }
+
+  if (detailsLoading || detailsError || selectedPassenger) {
+    return (
+      <AdminPageShell
+        title="Detalhes do passageiro"
+        description="Visão completa para atendimento, segurança e acompanhamento operacional."
+      >
+        <PassengerDetailsPanel
+          details={selectedPassenger}
+          loading={detailsLoading}
+          error={detailsError}
+          onClose={() => {
+            setSelectedPassenger(null);
+            setDetailsError("");
+          }}
+        />
+      </AdminPageShell>
+    );
   }
 
   return (
@@ -236,17 +254,6 @@ export default function AdminPassengersPage() {
         </div>
       ) : null}
 
-      {detailsLoading || detailsError || selectedPassenger ? (
-        <PassengerDetailsPanel
-          details={selectedPassenger}
-          loading={detailsLoading}
-          error={detailsError}
-          onClose={() => {
-            setSelectedPassenger(null);
-            setDetailsError("");
-          }}
-        />
-      ) : null}
     </AdminPageShell>
   );
 }
@@ -262,37 +269,23 @@ function PassengerDetailsPanel({
   error: string;
   onClose: () => void;
 }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, []);
-
-  if (!mounted) return null;
-
-  return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-0 md:items-center md:p-6" role="dialog" aria-modal="true" aria-label="Detalhes do passageiro">
-      <section className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-t-[28px] border border-white/10 bg-[#101010] p-5 shadow-2xl md:rounded-[28px] md:p-7">
+  return (
+    <div className="min-h-[60vh]">
+      <section className="w-full rounded-[28px] border border-white/10 bg-[#101010] p-5 shadow-2xl md:p-7">
         <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#c52b7d]">Atendimento CRM</p>
+            <p className="text-xs font-medium uppercase tracking-[0.12em] text-[#c52b7d]">Atendimento CRM · Passageiros</p>
             <h2 className="mt-1 text-2xl font-semibold text-white">Detalhes do passageiro</h2>
             <p className="mt-1 text-sm text-[#8ea0bd]">Visão consolidada para suporte, segurança e acompanhamento operacional.</p>
           </div>
-          <button type="button" onClick={onClose} className="rounded-xl border border-white/10 p-2 text-[#b7c2d6] hover:bg-white/5" aria-label="Fechar detalhes"><MaterialIcon name="close" className="h-5 w-5" /></button>
+          <button type="button" onClick={onClose} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-[#b7c2d6] hover:bg-white/5" aria-label="Voltar para passageiros"><MaterialIcon name="arrow_back" className="h-5 w-5" />Voltar</button>
         </div>
 
         {loading ? <div className="py-16"><AdminLoadingState label="Carregando detalhes do passageiro..." /></div> : null}
         {error ? <div className="py-8"><AdminErrorState message={error} /></div> : null}
         {details ? <PassengerDetailsContent details={details} /> : null}
       </section>
-    </div>,
-    document.body
+    </div>
   );
 }
 
