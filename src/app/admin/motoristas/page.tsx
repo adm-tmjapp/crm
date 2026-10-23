@@ -48,6 +48,21 @@ function formatDate(value?: string | null) {
   return value ? new Date(value).toLocaleString("pt-BR") : "-";
 }
 
+const securityEventLabels: Record<string, string> = {
+  PASSWORD_RESET_REQUESTED: "Solicitou recuperação de senha",
+  PASSWORD_RESET_CODE_GENERATED: "Código de recuperação gerado",
+  PASSWORD_RESET_EMAIL_SENT: "Código enviado por e-mail",
+  PASSWORD_RESET_EMAIL_FAILED: "Falha no envio do código",
+  PASSWORD_RESET_CODE_INVALID: "Código informado inválido",
+  PASSWORD_RESET_CODE_EXPIRED: "Código informado expirado",
+  PASSWORD_RESET_CODE_VERIFIED: "Código validado",
+  PASSWORD_RESET_COMPLETED: "Senha redefinida com sucesso"
+};
+
+function securityEventLabel(action?: string | null) {
+  return securityEventLabels[String(action || "")] || action || "Evento de segurança";
+}
+
 export default function AdminDriversPage() {
   const [items, setItems] = useState<AdminUser[]>([]);
   const [query, setQuery] = useState("");
@@ -465,6 +480,39 @@ function DriverDetailsPanel({
               <InfoRow label="Telefone verificado" value={details.user.phoneVerified ? "Sim" : "Não"} />
               <InfoRow label="Cadastro" value={formatDate(details.user.createdAt)} />
               <InfoRow label="Última atualização" value={formatDate(details.user.updatedAt)} />
+            </div>
+          </section>
+
+          <section className="md:col-span-2">
+            <SectionTitle title="Segurança e recuperação de acesso" />
+            <p className="mt-1 text-xs text-[#708099]">
+              Histórico seguro das tentativas de recuperação. Senhas, códigos e tokens nunca são exibidos.
+            </p>
+            <div className="mt-4 space-y-3">
+              {details.securityEvents?.length ? details.securityEvents.map((event) => {
+                const eventDetails = event.details || {};
+                const outcome = eventDetails.outcome ? String(eventDetails.outcome) : "";
+                const provider = eventDetails.provider ? String(eventDetails.provider) : "";
+                const retryable = eventDetails.retryable === true ? "Pode tentar novamente" : "";
+                return (
+                  <div key={event.id} className="rounded-2xl border border-white/10 bg-black p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-white">{securityEventLabel(event.action)}</p>
+                        <p className="mt-1 text-xs text-[#708099]">{formatDate(event.createdAt)}</p>
+                      </div>
+                      <span className="rounded-lg bg-[#1f2d4b] px-2.5 py-1 text-xs text-[#9bb0d1]">
+                        {eventDetails.channel ? String(eventDetails.channel) : "AUTENTICAÇÃO"}
+                      </span>
+                    </div>
+                    {(outcome || provider || retryable) ? (
+                      <p className="mt-3 text-xs text-[#9aa8c1]">
+                        {[outcome, provider, retryable].filter(Boolean).join(" · ")}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              }) : <EmptyDetail text="Nenhuma tentativa de recuperação registrada." />}
             </div>
           </section>
 

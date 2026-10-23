@@ -53,6 +53,89 @@ export type AdminDriverDetails = {
       reviewedAt?: string | null;
     }>;
   }>;
+  securityEvents?: Array<{
+    id: string;
+    action?: string | null;
+    targetType?: string | null;
+    targetId?: string | null;
+    details?: Record<string, unknown>;
+    createdAt?: string | null;
+  }>;
+};
+
+export type AdminPassengerDetails = {
+  user: AdminUser & {
+    cpfMasked?: string | null;
+    emailVerified?: boolean;
+    phoneVerified?: boolean;
+    profilePhoto?: string | null;
+    address?: {
+      formattedAddress?: string | null;
+      street?: string | null;
+      number?: string | null;
+      city?: string | null;
+      state?: string | null;
+      zipCode?: string | null;
+    } | null;
+  };
+  summary: {
+    totalRides?: number;
+    completedRides?: number;
+    canceledRides?: number;
+    activeRides?: number;
+    totalSpent?: number;
+    openSupportTickets?: number;
+    lastActivityAt?: string | null;
+  };
+  recentRides: Array<{
+    id: string;
+    status?: string | null;
+    requestedAt?: string | null;
+    completedAt?: string | null;
+    cancellationReason?: string | null;
+    paymentMethod?: string | null;
+    paymentStatus?: string | null;
+    amount?: number | null;
+    origin?: string | null;
+    destination?: string | null;
+    driver?: { id?: string | null; name?: string | null } | null;
+    vehicle?: { model?: string | null; licensePlate?: string | null } | null;
+  }>;
+  payments: Array<{
+    id: string;
+    source?: string;
+    rideId?: string | null;
+    amount?: number | null;
+    status?: string | null;
+    method?: string | null;
+    provider?: string | null;
+    receiptUrl?: string | null;
+    createdAt?: string | null;
+  }>;
+  supportTickets: Array<{
+    id: string;
+    rideId?: string | null;
+    issueCode?: string;
+    subject?: string | null;
+    message?: string;
+    status?: string;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+  }>;
+  securityAlerts: Array<{
+    id: string;
+    action?: string;
+    targetType?: string;
+    details?: Record<string, unknown>;
+    createdAt?: string | null;
+  }>;
+  auditHistory: Array<{
+    id: string;
+    action?: string;
+    targetType?: string;
+    details?: Record<string, unknown>;
+    createdAt?: string | null;
+  }>;
 };
 
 export type AdminDocument = {
@@ -564,6 +647,15 @@ export async function getDriverDetails(userId: string) {
     success: boolean;
     data: AdminDriverDetails;
   }>(`/admin/users/${userId}/details`);
+
+  return payload.data;
+}
+
+export async function getPassengerDetails(userId: string) {
+  const payload = await fetchJson<{
+    success: boolean;
+    data: AdminPassengerDetails;
+  }>(`/admin/users/${userId}/passenger-details`);
 
   return payload.data;
 }
