@@ -152,6 +152,7 @@ export default function AdminDriversPage() {
   async function handleOpenDetails(userId: string) {
     setDetailsLoading(true);
     setDetailsError("");
+    setSelectedDriver(null);
     try {
       setSelectedDriver(await getDriverDetails(userId));
     } catch (detailsLoadError) {
@@ -186,6 +187,33 @@ export default function AdminDriversPage() {
       return matchesQuery && matchesAuthStatus && matchesOnboarding;
     });
   }, [authStatusFilter, items, onboardingFilter, query]);
+
+  if (detailsLoading || detailsError || selectedDriver) {
+    return (
+      <AdminPageShell
+        title="Detalhes do motorista"
+        description="Visão completa para acompanhar cadastro, onboarding, documentos, veículo e segurança."
+      >
+        {detailsLoading ? (
+          <div className="rounded-[28px] border border-white/10 bg-[#111111] p-8">
+            <AdminLoadingState label="Carregando detalhes do motorista..." />
+          </div>
+        ) : null}
+        {detailsError ? (
+          <AdminErrorState message={detailsError} />
+        ) : null}
+        {selectedDriver ? (
+          <DriverDetailsPanel
+            details={selectedDriver}
+            onClose={() => {
+              setSelectedDriver(null);
+              setDetailsError("");
+            }}
+          />
+        ) : null}
+      </AdminPageShell>
+    );
+  }
 
   return (
     <AdminPageShell
@@ -361,31 +389,6 @@ export default function AdminDriversPage() {
           ))}
         </div>
       ) : null}
-      {detailsLoading ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="rounded-2xl border border-white/10 bg-[#111111] px-6 py-5 text-sm text-white">
-            Carregando detalhes do motorista...
-          </div>
-        </div>
-      ) : null}
-      {selectedDriver ? (
-        <DriverDetailsPanel
-          details={selectedDriver}
-          onClose={() => setSelectedDriver(null)}
-        />
-      ) : null}
-      {detailsError ? (
-        <div className="fixed bottom-6 right-6 z-50 max-w-md rounded-2xl border border-[#ff7b8a]/40 bg-[#2c1013] px-5 py-4 text-sm text-[#ffb0b8] shadow-2xl">
-          {detailsError}
-          <button
-            type="button"
-            onClick={() => setDetailsError("")}
-            className="ml-3 font-semibold text-white underline"
-          >
-            Fechar
-          </button>
-        </div>
-      ) : null}
     </AdminPageShell>
   );
 }
@@ -410,8 +413,8 @@ function DriverDetailsPanel({
       : "PENDING";
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-4 md:p-8">
-      <div className="mx-auto max-w-6xl rounded-[28px] border border-white/10 bg-[#111111] shadow-2xl">
+    <div className="min-h-[60vh]">
+      <div className="w-full max-w-6xl rounded-[28px] border border-white/10 bg-[#111111] shadow-2xl">
         <div className="flex items-start justify-between border-b border-white/10 p-6 md:p-8">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#d95b9a]">
@@ -427,9 +430,10 @@ function DriverDetailsPanel({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-white/10 px-3 py-2 text-sm text-[#b7c3d8] hover:bg-white/5"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm text-[#b7c3d8] hover:bg-white/5"
           >
-            Fechar
+            <MaterialIcon name="arrow_back" className="h-5 w-5" />
+            Voltar
           </button>
         </div>
 
