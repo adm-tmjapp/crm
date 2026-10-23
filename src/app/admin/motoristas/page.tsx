@@ -44,6 +44,22 @@ function labelForStatus(status?: string | null) {
   return statusLabels[String(status || "PENDING").toUpperCase()] || status || "Pendente";
 }
 
+function statusTone(status?: string | null) {
+  switch (String(status || "PENDING").toUpperCase()) {
+    case "ACTIVE":
+    case "APPROVED":
+    case "COMPLETED":
+      return "bg-emerald-500/10 text-emerald-200";
+    case "BLOCKED":
+    case "REJECTED":
+      return "bg-red-500/10 text-red-200";
+    case "UNDER_REVIEW":
+      return "bg-amber-500/10 text-amber-200";
+    default:
+      return "bg-blue-500/10 text-blue-200";
+  }
+}
+
 function formatDate(value?: string | null) {
   return value ? new Date(value).toLocaleString("pt-BR") : "-";
 }
@@ -250,7 +266,9 @@ export default function AdminDriversPage() {
                 <option value="ALL">Todos</option>
                 <option value="ACTIVE">Ativos</option>
                 <option value="PENDING">Pendentes</option>
+                <option value="UNDER_REVIEW">Em análise</option>
                 <option value="BLOCKED">Bloqueados</option>
+                <option value="INACTIVE">Inativos</option>
               </select>
             </label>
 
@@ -305,88 +323,96 @@ export default function AdminDriversPage() {
         <AdminEmptyState label="Nenhum motorista encontrado com os filtros atuais." />
       ) : null}
       {!loading && filteredItems.length ? (
-        <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
-          {filteredItems.map((item) => (
-            <article
-              key={item.id}
-              className="rounded-[24px] border border-white/10 bg-[#111111] p-6"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1f2d4b] text-[#9bb0d1]">
-                  <MaterialIcon name="person" className="h-7 w-7" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="truncate text-[20px] font-semibold text-white">
-                    {item.name || "Motorista sem nome"}
-                  </h2>
-                  <p className="truncate text-[15px] text-[#8ea0bd]">
-                    {item.email || item.phone || "Sem contato"}
-                  </p>
-                </div>
-              </div>
+        <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[#111111]">
+          <div className="overflow-x-auto">
+            <table className="min-w-[1180px] w-full text-left">
+              <caption className="sr-only">Tabela operacional de motoristas</caption>
+              <thead className="border-b border-white/10 bg-[#151515] text-[11px] uppercase tracking-[0.08em] text-[#708099]">
+                <tr>
+                  <th scope="col" className="px-5 py-4 font-medium">Motorista</th>
+                  <th scope="col" className="px-5 py-4 font-medium">Status da conta</th>
+                  <th scope="col" className="px-5 py-4 font-medium">Onboarding</th>
+                  <th scope="col" className="px-5 py-4 font-medium">Cadastro</th>
+                  <th scope="col" className="px-5 py-4 text-right font-medium">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredItems.map((item) => {
+                  const authStatus = item.authStatus || "PENDING";
+                  const onboardingStatus = item.onboardingStatus || "PENDING";
+                  const isBusy = busyId === item.id || busyId === `reset-${item.id}`;
 
-              <div className="mt-6 grid gap-3">
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black px-4 py-4">
-                  <span className="text-sm text-[#8ea0bd]">Status</span>
-                  <span className="rounded-xl bg-[#13253c] px-3 py-1 text-sm text-[#8fb4f2]">
-                    {item.authStatus || "PENDING"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black px-4 py-4">
-                  <span className="text-sm text-[#8ea0bd]">Onboarding</span>
-                  <span className="rounded-xl bg-[#3c1228] px-3 py-1 text-sm text-[#d95b9a]">
-                    {item.onboardingStatus || "PENDING"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between">
-                <div className="text-sm text-[#708099]">
-                  Cadastro:{" "}
-                  {item.createdAt
-                    ? new Date(item.createdAt).toLocaleDateString("pt-BR")
-                    : "-"}
-                </div>
-                <div className="flex flex-wrap items-center justify-end gap-2">
-                  {item.authStatus === "BLOCKED" ? (
-                    <button
-                      type="button"
-                      onClick={() => handleUnblock(item.id)}
-                      disabled={busyId === item.id}
-                      className="rounded-2xl bg-[#03271c] px-4 py-3 text-sm font-medium text-[#0bd38a] transition hover:brightness-110 disabled:opacity-50"
-                    >
-                      Desbloquear
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleBlock(item.id)}
-                      disabled={busyId === item.id}
-                      className="rounded-2xl bg-[#2c1013] px-4 py-3 text-sm font-medium text-[#ff7b8a] transition hover:brightness-110 disabled:opacity-50"
-                    >
-                      Bloquear
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => handleResetOnboarding(item.id)}
-                    disabled={busyId === `reset-${item.id}`}
-                    className="rounded-2xl border border-white/10 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/5 disabled:opacity-50"
-                  >
-                    Resetar onboarding
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleOpenDetails(item.id)}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#d95b9a]/40 bg-[#3c1228] px-4 py-3 text-sm font-semibold text-[#f08abb] transition hover:bg-[#52183a]"
-                >
-                  <MaterialIcon name="visibility" className="h-5 w-5" />
-                  Ver detalhes do motorista
-                </button>
-              </div>
-            </article>
-          ))}
+                  return (
+                    <tr key={item.id} className="align-middle transition hover:bg-white/[0.03]">
+                      <td className="px-5 py-4">
+                        <div className="flex min-w-[260px] items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1f2d4b] text-[#9bb0d1]">
+                            <MaterialIcon name="person" className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate font-semibold text-white">{item.name || "Motorista sem nome"}</p>
+                            <p className="truncate text-xs text-[#8ea0bd]">{item.email || item.phone || "Sem contato"}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex rounded-xl px-3 py-1.5 text-xs font-semibold ${statusTone(authStatus)}`}>
+                          {labelForStatus(authStatus)}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className={`inline-flex rounded-xl px-3 py-1.5 text-xs font-semibold ${statusTone(onboardingStatus)}`}>
+                          {labelForStatus(onboardingStatus)}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-[#8ea0bd]">
+                        {item.createdAt ? new Date(item.createdAt).toLocaleDateString("pt-BR") : "-"}
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex min-w-[360px] justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetails(item.id)}
+                            className="inline-flex items-center gap-1.5 rounded-xl border border-[#d95b9a]/40 bg-[#3c1228] px-3 py-2 text-xs font-semibold text-[#f08abb] transition hover:bg-[#52183a]"
+                          >
+                            <MaterialIcon name="visibility" className="h-4 w-4" />
+                            Detalhes
+                          </button>
+                          {authStatus === "BLOCKED" ? (
+                            <button
+                              type="button"
+                              onClick={() => handleUnblock(item.id)}
+                              disabled={isBusy}
+                              className="rounded-xl bg-[#03271c] px-3 py-2 text-xs font-semibold text-[#0bd38a] transition hover:brightness-110 disabled:opacity-50"
+                            >
+                              Desbloquear
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleBlock(item.id)}
+                              disabled={isBusy}
+                              className="rounded-xl bg-[#2c1013] px-3 py-2 text-xs font-semibold text-[#ff7b8a] transition hover:brightness-110 disabled:opacity-50"
+                            >
+                              Bloquear
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleResetOnboarding(item.id)}
+                            disabled={isBusy}
+                            className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/5 disabled:opacity-50"
+                          >
+                            Resetar onboarding
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : null}
     </AdminPageShell>
