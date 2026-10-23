@@ -12,6 +12,49 @@ export type AdminUser = {
   onboardingStatus?: string | null;
 };
 
+export type AdminDriverDetails = {
+  user: AdminUser & {
+    cpf?: string | null;
+    emailVerified?: boolean;
+    phoneVerified?: boolean;
+    profilePhoto?: string | null;
+    updatedAt?: string | null;
+  };
+  onboardingStatus?: {
+    isCompleted?: boolean;
+    isUnderReview?: boolean;
+    canDrive?: boolean;
+    steps?: Record<string, { completed?: boolean; underReview?: boolean }>;
+  } | null;
+  documents: Array<{
+    id: string;
+    type?: string;
+    side?: string | null;
+    status?: string;
+    fileUrl?: string | null;
+    filename?: string | null;
+    rejectionReason?: string | null;
+    createdAt?: string | null;
+    reviewedAt?: string | null;
+  }>;
+  vehicles: Array<AdminVehicle & {
+    year?: string | null;
+    color?: string | null;
+    vehicleType?: string | null;
+    usage?: string | null;
+    activationStatus?: string | null;
+    photos?: Array<{
+      id: string;
+      type?: string;
+      status?: string;
+      fileUrl?: string | null;
+      rejectionReason?: string | null;
+      createdAt?: string | null;
+      reviewedAt?: string | null;
+    }>;
+  }>;
+};
+
 export type AdminDocument = {
   id: string;
   type?: string;
@@ -514,6 +557,15 @@ export async function listUsers(params?: {
   }>(`/admin/users?${search.toString()}`);
 
   return payload.data || { users: [], total: 0, page: 1, limit: 20 };
+}
+
+export async function getDriverDetails(userId: string) {
+  const payload = await fetchJson<{
+    success: boolean;
+    data: AdminDriverDetails;
+  }>(`/admin/users/${userId}/details`);
+
+  return payload.data;
 }
 
 export async function listPayments(params?: {

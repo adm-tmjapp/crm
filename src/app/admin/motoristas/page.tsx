@@ -11,11 +11,42 @@ import { MaterialIcon } from "@/components/admin/material-icon";
 import {
   AdminApiError,
   blockUser,
+  getDriverDetails,
   listUsers,
   resetDriverOnboarding,
   unblockUser,
+  type AdminDriverDetails,
   type AdminUser
 } from "@/services/admin-content-service";
+
+const onboardingStepLabels: Record<string, string> = {
+  profilePhoto: "Foto de perfil",
+  email: "Verificação de e-mail",
+  phone: "Verificação de telefone",
+  documents: "CNH",
+  criminalRecord: "Antecedentes criminais",
+  vehicle: "Cadastro do veículo",
+  vehiclePhotos: "Fotos do veículo"
+};
+
+const statusLabels: Record<string, string> = {
+  APPROVED: "Aprovado",
+  ACTIVE: "Ativo",
+  BLOCKED: "Bloqueado",
+  COMPLETED: "Concluído",
+  PENDING: "Pendente",
+  REJECTED: "Rejeitado",
+  UNDER_REVIEW: "Em análise",
+  INACTIVE: "Inativo"
+};
+
+function labelForStatus(status?: string | null) {
+  return statusLabels[String(status || "PENDING").toUpperCase()] || status || "Pendente";
+}
+
+function formatDate(value?: string | null) {
+  return value ? new Date(value).toLocaleString("pt-BR") : "-";
+}
 
 export default function AdminDriversPage() {
   const [items, setItems] = useState<AdminUser[]>([]);
@@ -25,6 +56,9 @@ export default function AdminDriversPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
+  const [selectedDriver, setSelectedDriver] = useState<AdminDriverDetails | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsError, setDetailsError] = useState("");
 
   async function load() {
     setLoading(true);
@@ -97,6 +131,22 @@ export default function AdminDriversPage() {
       );
     } finally {
       setBusyId("");
+    }
+  }
+
+  async function handleOpenDetails(userId: string) {
+    setDetailsLoading(true);
+    setDetailsError("");
+    try {
+      setSelectedDriver(await getDriverDetails(userId));
+    } catch (detailsLoadError) {
+      setDetailsError(
+        detailsLoadError instanceof Error
+          ? detailsLoadError.message
+          : "Falha ao carregar detalhes do motorista."
+      );
+    } finally {
+      setDetailsLoading(false);
     }
   }
 
@@ -283,11 +333,195 @@ export default function AdminDriversPage() {
                     Resetar onboarding
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => handleOpenDetails(item.id)}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-[#d95b9a]/40 bg-[#3c1228] px-4 py-3 text-sm font-semibold text-[#f08abb] transition hover:bg-[#52183a]"
+                >
+                  <MaterialIcon name="visibility" className="h-5 w-5" />
+                  Ver detalhes do motorista
+                </button>
               </div>
             </article>
           ))}
         </div>
       ) : null}
+      {detailsLoading ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="rounded-2xl border border-white/10 bg-[#111111] px-6 py-5 text-sm text-white">
+            Carregando detalhes do motorista...
+          </div>
+        </div>
+      ) : null}
+      {selectedDriver ? (
+        <DriverDetailsPanel
+          details={selectedDriver}
+          onClose={() => setSelectedDriver(null)}
+        />
+      ) : null}
+      {detailsError ? (
+        <div className="fixed bottom-6 right-6 z-50 max-w-md rounded-2xl border border-[#ff7b8a]/40 bg-[#2c1013] px-5 py-4 text-sm text-[#ffb0b8] shadow-2xl">
+          {detailsError}
+          <button
+            type="button"
+            onClick={() => setDetailsError("")}
+            className="ml-3 font-semibold text-white underline"
+          >
+            Fechar
+          </button>
+        </div>
+      ) : null}
     </AdminPageShell>
   );
+}
+
+function DriverDetailsPanel({
+  details,
+  onClose
+}: {
+  details: AdminDriverDetails;
+  onClose: () => void;
+}) {
+  const onboarding = details.onboardingStatus;
+  const steps = Object.entries(onboarding?.steps || {});
+  const completedSteps = steps.filter(([, step]) => step.completed).length;
+  const totalSteps = steps.length;
+  const currentStep =
+    steps.find(([, step]) => !step.completed)?.[0] || "-";
+  const onboardingLabel = onboarding?.isCompleted
+    ? "COMPLETED"
+    : onboarding?.isUnderReview
+      ? "UNDER_REVIEW"
+      : "PENDING";
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 p-4 md:p-8">
+      <div className="mx-auto max-w-6xl rounded-[28px] border border-white/10 bg-[#111111] shadow-2xl">
+        <div className="flex items-start justify-between border-b border-white/10 p-6 md:p-8">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#d95b9a]">
+              Detalhes do motorista
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-white">
+              {details.user.name || "Motorista sem nome"}
+            </h2>
+            <p className="mt-1 text-sm text-[#8ea0bd]">
+              {details.user.email || details.user.phone || "Sem contato"}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-white/10 px-3 py-2 text-sm text-[#b7c3d8] hover:bg-white/5"
+          >
+            Fechar
+          </button>
+        </div>
+
+        <div className="grid gap-4 border-b border-white/10 p-6 md:grid-cols-4 md:p-8">
+          <SummaryCard label="Conta" value={labelForStatus(details.user.authStatus)} />
+          <SummaryCard label="Onboarding" value={labelForStatus(onboardingLabel)} />
+          <SummaryCard
+            label="Progresso"
+            value={totalSteps ? `${completedSteps} de ${totalSteps} etapas` : "Sem dados"}
+          />
+          <SummaryCard
+            label="Próxima etapa"
+            value={onboardingStepLabels[currentStep] || currentStep}
+          />
+        </div>
+
+        <div className="grid gap-6 p-6 md:grid-cols-[1.1fr_0.9fr] md:p-8">
+          <section>
+            <SectionTitle title="Linha do tempo do onboarding" />
+            <div className="mt-4 space-y-3">
+              {steps.map(([key, step]) => (
+                <div
+                  key={key}
+                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-black px-4 py-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`flex h-8 w-8 items-center justify-center rounded-full text-sm ${step.completed ? "bg-[#03271c] text-[#0bd38a]" : step.underReview ? "bg-[#30260c] text-[#f6c453]" : "bg-[#2c1013] text-[#ff7b8a]"}`}>
+                      {step.completed ? "✓" : step.underReview ? "…" : "!"}
+                    </span>
+                    <span className="text-sm font-medium text-white">
+                      {onboardingStepLabels[key] || key}
+                    </span>
+                  </div>
+                  <span className="text-xs text-[#9aa8c1]">
+                    {step.completed ? "Concluído" : step.underReview ? "Em análise" : "Pendente"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <SectionTitle title="Dados do cadastro" />
+            <div className="mt-4 space-y-3 rounded-2xl border border-white/10 bg-black p-5 text-sm">
+              <InfoRow label="Telefone" value={details.user.phone} />
+              <InfoRow label="CPF" value={details.user.cpf} />
+              <InfoRow label="E-mail verificado" value={details.user.emailVerified ? "Sim" : "Não"} />
+              <InfoRow label="Telefone verificado" value={details.user.phoneVerified ? "Sim" : "Não"} />
+              <InfoRow label="Cadastro" value={formatDate(details.user.createdAt)} />
+              <InfoRow label="Última atualização" value={formatDate(details.user.updatedAt)} />
+            </div>
+          </section>
+
+          <section>
+            <SectionTitle title={`Documentos (${details.documents.length})`} />
+            <div className="mt-4 space-y-3">
+              {details.documents.length ? details.documents.map((document) => (
+                <div key={document.id} className="rounded-2xl border border-white/10 bg-black p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-white">{document.type}{document.side ? ` · ${document.side}` : ""}</p>
+                      <p className="mt-1 text-xs text-[#708099]">Enviado em {formatDate(document.createdAt)}</p>
+                    </div>
+                    <span className="rounded-lg bg-[#1f2d4b] px-2.5 py-1 text-xs text-[#9bb0d1]">{labelForStatus(document.status)}</span>
+                  </div>
+                  {document.rejectionReason ? <p className="mt-3 text-xs text-[#ff9ca7]">Motivo: {document.rejectionReason}</p> : null}
+                </div>
+              )) : <EmptyDetail text="Nenhum documento enviado." />}
+            </div>
+          </section>
+
+          <section>
+            <SectionTitle title={`Veículos (${details.vehicles.length})`} />
+            <div className="mt-4 space-y-3">
+              {details.vehicles.length ? details.vehicles.map((vehicle) => (
+                <div key={vehicle.id} className="rounded-2xl border border-white/10 bg-black p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium text-white">{vehicle.manufacturer} {vehicle.modelName}</p>
+                      <p className="mt-1 text-sm text-[#8ea0bd]">{vehicle.vehiclePlate || "Sem placa"} · {vehicle.color || "Cor não informada"}</p>
+                    </div>
+                    <span className="rounded-lg bg-[#3c1228] px-2.5 py-1 text-xs text-[#d95b9a]">{labelForStatus(vehicle.status)}</span>
+                  </div>
+                  <p className="mt-3 text-xs text-[#9aa8c1]">Documentação: {labelForStatus(vehicle.documentationStatus)} · Fotos: {vehicle.photos?.length || 0}</p>
+                  {vehicle.photos?.some((photo) => photo.rejectionReason) ? <p className="mt-2 text-xs text-[#ff9ca7]">Há fotos rejeitadas que precisam de novo envio.</p> : null}
+                </div>
+              )) : <EmptyDetail text="Nenhum veículo cadastrado." />}
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SummaryCard({ label, value }: { label: string; value: string }) {
+  return <div className="rounded-2xl border border-white/10 bg-black p-4"><p className="text-xs uppercase tracking-[0.08em] text-[#708099]">{label}</p><p className="mt-2 text-sm font-semibold text-white">{value}</p></div>;
+}
+
+function SectionTitle({ title }: { title: string }) {
+  return <h3 className="text-base font-semibold text-white">{title}</h3>;
+}
+
+function InfoRow({ label, value }: { label: string; value?: string | null }) {
+  return <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-3 last:border-0 last:pb-0"><span className="text-[#708099]">{label}</span><span className="text-right text-white">{value || "-"}</span></div>;
+}
+
+function EmptyDetail({ text }: { text: string }) {
+  return <div className="rounded-2xl border border-dashed border-white/10 p-5 text-sm text-[#708099]">{text}</div>;
 }
