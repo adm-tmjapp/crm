@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 import {
   AdminEmptyState,
@@ -261,8 +262,21 @@ function PassengerDetailsPanel({
   error: string;
   onClose: () => void;
 }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 md:items-center md:p-6" role="dialog" aria-modal="true" aria-label="Detalhes do passageiro">
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/70 p-0 md:items-center md:p-6" role="dialog" aria-modal="true" aria-label="Detalhes do passageiro">
       <section className="max-h-[94vh] w-full max-w-6xl overflow-y-auto rounded-t-[28px] border border-white/10 bg-[#101010] p-5 shadow-2xl md:rounded-[28px] md:p-7">
         <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
           <div>
@@ -277,7 +291,8 @@ function PassengerDetailsPanel({
         {error ? <div className="py-8"><AdminErrorState message={error} /></div> : null}
         {details ? <PassengerDetailsContent details={details} /> : null}
       </section>
-    </div>
+    </div>,
+    document.body
   );
 }
 

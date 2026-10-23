@@ -338,6 +338,12 @@ export type AdminPayment = {
   amount: number;
   paymentMethod?: string | null;
   status?: string | null;
+  provider?: string | null;
+  providerPaymentId?: string | null;
+  failureCode?: string | null;
+  failureMessage?: string | null;
+  failureRetryable?: boolean;
+  failedAt?: string | null;
   createdAt?: string | null;
 };
 

@@ -189,6 +189,9 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
     (sum, payment) => sum + Number(payment.amount || 0),
     0
   );
+  const pixFailures = payments.filter(
+    (payment) => payment.paymentMethod === "PIX" && payment.status === "FAILED"
+  );
 
   function toggleMethod(method: PaymentMethod) {
     setDraft((current) => {
@@ -289,7 +292,7 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
       {loading ? <AdminLoadingState label="Carregando pagamentos..." /> : null}
 
       {!loading ? (
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-4">
           <div className="rounded-2xl border border-white/10 bg-[#111111] p-6">
             <div className="text-sm uppercase tracking-[0.18em] text-[#8ea0bd]">
               Registros
@@ -311,6 +314,13 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
             <div className="mt-3 text-4xl font-bold text-white">
               {smsUsage?.totalMessages || 0}
             </div>
+          </div>
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6">
+            <div className="text-sm uppercase tracking-[0.18em] text-[#ff9ca7]">
+              Falhas Pix
+            </div>
+            <div className="mt-3 text-4xl font-bold text-white">{pixFailures.length}</div>
+            <p className="mt-2 text-xs text-[#ffb0b8]">Nas últimas transações carregadas</p>
           </div>
         </div>
       ) : null}
@@ -565,6 +575,53 @@ const [draft, setDraft] = useState<PaymentSettingsDraft>({
             </div>
           </section>
         </div>
+      ) : null}
+
+      {!loading && pixFailures.length ? (
+        <section className="overflow-hidden rounded-[24px] border border-red-500/20 bg-[#1a1012]">
+          <div className="border-b border-red-500/20 px-6 py-5">
+            <h2 className="text-[18px] font-semibold text-white">Falhas recentes de pagamento Pix</h2>
+            <p className="mt-1 text-sm text-[#ffb0b8]">
+              Ocorrências registradas para investigação no CRM. A mensagem técnica do provedor permanece restrita aos dados operacionais.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-[900px] w-full text-left">
+              <thead className="border-b border-red-500/20 text-[11px] uppercase tracking-[0.12em] text-[#ff9ca7]">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Corrida / Passageiro</th>
+                  <th className="px-6 py-4 font-medium">Valor</th>
+                  <th className="px-6 py-4 font-medium">Erro</th>
+                  <th className="px-6 py-4 font-medium">Tentativa</th>
+                  <th className="px-6 py-4 font-medium">Data</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-red-500/10">
+                {pixFailures.map((payment) => (
+                  <tr key={payment.id} className="hover:bg-red-500/[0.04]">
+                    <td className="px-6 py-4 text-sm text-white">
+                      <p>{payment.rideId || "Corrida não identificada"}</p>
+                      <p className="mt-1 text-xs text-[#ffb0b8]">{payment.passengerId || "Passageiro não identificado"}</p>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-white">{formatCurrency(payment.amount)}</td>
+                    <td className="px-6 py-4 text-sm text-[#ffb0b8]">
+                      <p>{payment.failureCode || "PIX_PAYMENT_FAILED"}</p>
+                      <p className="mt-1 text-xs">{payment.failureMessage || "Falha ao gerar pagamento Pix."}</p>
+                    </td>
+                    <td className="px-6 py-4 text-xs text-[#ffb0b8]">
+                      {payment.failureRetryable ? "Pode tentar novamente" : "Analisar ocorrência"}
+                    </td>
+                    <td className="px-6 py-4 text-xs text-[#ffb0b8]">
+                      {payment.failedAt || payment.createdAt
+                        ? new Date(payment.failedAt || payment.createdAt || "").toLocaleString("pt-BR")
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
       ) : null}
 
       {!loading && !payments.length ? (
