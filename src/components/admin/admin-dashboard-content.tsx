@@ -52,8 +52,59 @@ function formatCurrency(value: number) {
 const statLinks = [
   "/admin/pagamentos",
   "/admin/motoristas",
-  "/admin/corridas",
+  "/admin/passageiros",
   "/admin/documentos"
+] as const;
+
+const operationalQueues = [
+  {
+    title: "Aprovações",
+    description: "Documentos e veículos aguardando análise.",
+    href: "/admin/documentos",
+    icon: "fact_check",
+    tone: "amber",
+    countKey: "pendingApprovals" as const
+  },
+  {
+    title: "Motoristas",
+    description: "Onboarding, cadastro e segurança de acesso.",
+    href: "/admin/motoristas",
+    icon: "person_pin",
+    tone: "blue" as const,
+    countKey: undefined
+  },
+  {
+    title: "Passageiros",
+    description: "Atendimento, histórico e alertas operacionais.",
+    href: "/admin/passageiros",
+    icon: "groups",
+    tone: "purple" as const,
+    countKey: undefined
+  },
+  {
+    title: "Corridas",
+    description: "Acompanhe status, cancelamentos e detalhes.",
+    href: "/admin/corridas",
+    icon: "directions_car",
+    tone: "blue" as const,
+    countKey: undefined
+  },
+  {
+    title: "Pagamentos",
+    description: "Pix, cartão, falhas e configurações financeiras.",
+    href: "/admin/pagamentos",
+    icon: "account_balance_wallet",
+    tone: "pink" as const,
+    countKey: undefined
+  },
+  {
+    title: "Saques",
+    description: "Analise solicitações e avance cada etapa.",
+    href: "/admin/saques-motoristas",
+    icon: "payments",
+    tone: "amber" as const,
+    countKey: undefined
+  }
 ] as const;
 
 function ApprovalActions({
@@ -316,6 +367,55 @@ export function AdminDashboardContent() {
           {error}
         </div>
       ) : null}
+
+      <section className="rounded-[20px] border border-white/12 bg-[#111111] p-6">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#cf2f7d]">
+              Central de operação
+            </p>
+            <h2 className="mt-2 text-[20px] font-bold text-white">
+              O que precisa de atenção?
+            </h2>
+            <p className="mt-1 max-w-2xl text-[13px] text-[#7c8aa3]">
+              Acesse diretamente as filas e áreas usadas no atendimento diário.
+            </p>
+          </div>
+          <Link
+            href="/admin/auditoria"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-[#cf2f7d] hover:text-[#ee73ad]"
+          >
+            Ver histórico administrativo
+            <MaterialIcon name="arrow_forward" className="h-4 w-4" />
+          </Link>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {operationalQueues.map((queue) => (
+            <Link
+              key={queue.title}
+              href={queue.href}
+              className="group flex min-h-[112px] items-start gap-4 rounded-2xl border border-white/10 bg-black p-4 transition hover:border-[#cf2f7d]/50 hover:bg-white/[0.03]"
+            >
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${toneClassByStat[queue.tone]}`}>
+                <MaterialIcon name={queue.icon} className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-semibold text-white">{queue.title}</h3>
+                  <MaterialIcon name="arrow_forward" className="h-4 w-4 text-[#708099] transition group-hover:text-[#cf2f7d]" />
+                </div>
+                <p className="mt-1 text-xs leading-5 text-[#8ea0bd]">{queue.description}</p>
+                {queue.countKey === "pendingApprovals" ? (
+                  <p className="mt-2 text-xs font-semibold text-[#f3af23]">
+                    {isLoading ? "--" : `${data?.stats.pendingApprovals || 0} pendência(s)`}
+                  </p>
+                ) : null}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section className="rounded-[20px] border border-white/12 bg-[#111111] p-6">
         <div className="mb-6">
