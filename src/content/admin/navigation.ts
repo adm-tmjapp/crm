@@ -52,6 +52,18 @@ export const adminNavigationItems = [
     href: "/admin/documentos",
     icon: "fact_check",
     group: "Segurança e cadastros"
+  },
+  {
+    label: "Suporte",
+    href: "/admin/suporte",
+    icon: "support_agent",
+    group: "Segurança e cadastros"
+  },
+  {
+    label: "Segurança",
+    href: "/admin/seguranca",
+    icon: "security",
+    group: "Segurança e cadastros"
   }
 ];
 

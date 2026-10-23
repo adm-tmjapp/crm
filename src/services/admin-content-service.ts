@@ -191,6 +191,19 @@ export type AdminRideDetails = {
   raw?: Record<string, unknown> | null;
 };
 
+export type AdminSupportTicket = {
+  id: string;
+  rideId: string;
+  driverUserId: string;
+  issueCode: string;
+  subject?: string | null;
+  description?: string | null;
+  status: string;
+  message: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+
 export type AdminPayment = {
   id: string;
   rideId?: string | null;
@@ -525,6 +538,30 @@ export async function listPayments(params?: {
   }>(`/admin/payments?${search.toString()}`);
 
   return payload.data || { payments: [], total: 0, page: 1, limit: 20 };
+}
+
+export async function listSupportTickets(params?: {
+  page?: number;
+  limit?: number;
+  status?: string;
+  issueCode?: string;
+}) {
+  const search = new URLSearchParams();
+  search.set("page", String(params?.page || 1));
+  search.set("limit", String(params?.limit || 50));
+  if (params?.status) search.set("status", params.status);
+  if (params?.issueCode) search.set("issueCode", params.issueCode);
+
+  const payload = await fetchJson<{
+    data?: {
+      tickets?: AdminSupportTicket[];
+      total?: number;
+      page?: number;
+      limit?: number;
+    };
+  }>(`/admin/support/tickets?${search.toString()}`);
+
+  return payload.data || { tickets: [], total: 0, page: 1, limit: 50 };
 }
 
 export async function listDriverWithdrawals(params?: { status?: string; page?: number; limit?: number }) {
