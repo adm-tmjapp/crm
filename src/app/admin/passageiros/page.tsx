@@ -178,57 +178,60 @@ export default function AdminPassengersPage() {
       ) : null}
 
       {!loading && filteredItems.length ? (
-        <div className="grid gap-5 md:grid-cols-2 2xl:grid-cols-3">
-          {filteredItems.map((item) => (
-            <article
-              key={item.id}
-              className="rounded-[24px] border border-white/10 bg-[#111111] p-6"
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1f2d4b] text-[#9bb0d1]">
-                  <MaterialIcon name="person" className="h-7 w-7" />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="truncate text-[20px] font-semibold text-white">
-                    {item.name || "Passageiro sem nome"}
-                  </h2>
-                  <p className="truncate text-[15px] text-[#8ea0bd]">
-                    {item.email || item.phone || "Sem contato"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-3">
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-black px-4 py-4">
-                  <span className="text-sm text-[#8ea0bd]">Status</span>
-                  <span className="rounded-xl bg-[#13253c] px-3 py-1 text-sm text-[#8fb4f2]">
-                    {item.authStatus || "PENDING"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between gap-4">
-                <div className="truncate text-sm text-[#708099]">
-                  Telefone: {item.phone || "-"}
-                </div>
-                <div className="text-sm text-[#708099]">
-                  Cadastro:{" "}
-                  {item.createdAt
-                    ? new Date(item.createdAt).toLocaleDateString("pt-BR")
-                    : "-"}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => handleOpenDetails(item)}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#c52b7d] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#d63a8d]"
-              >
-                <MaterialIcon name="manage_search" className="h-5 w-5" />
-                Ver detalhes do passageiro
-              </button>
-            </article>
-          ))}
+        <div className="overflow-hidden rounded-[24px] border border-white/10 bg-[#111111]">
+          <div className="overflow-x-auto">
+            <table className="min-w-[920px] w-full text-left">
+              <caption className="sr-only">Lista operacional de passageiros</caption>
+              <thead className="border-b border-white/10 bg-[#151515] text-[11px] uppercase tracking-[0.08em] text-[#708099]">
+                <tr>
+                  <th scope="col" className="px-5 py-4 font-medium">Passageiro</th>
+                  <th scope="col" className="px-5 py-4 font-medium">Contato</th>
+                  <th scope="col" className="px-5 py-4 font-medium">Status</th>
+                  <th scope="col" className="px-5 py-4 font-medium">Cadastro</th>
+                  <th scope="col" className="px-5 py-4 text-right font-medium">Ação</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {filteredItems.map((item) => (
+                  <tr key={item.id} className="transition hover:bg-white/[0.03]">
+                    <td className="px-5 py-4">
+                      <div className="flex min-w-[230px] items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1f2d4b] text-[#9bb0d1]">
+                          <MaterialIcon name="person" className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-white">{item.name || "Passageiro sem nome"}</p>
+                          <p className="truncate text-xs text-[#708099]">ID: {item.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-[#aebbd0]">
+                      <p>{item.email || "E-mail não informado"}</p>
+                      <p className="mt-1 text-xs text-[#708099]">{item.phone || "Telefone não informado"}</p>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="inline-flex rounded-xl bg-[#13253c] px-3 py-1 text-xs font-medium text-[#8fb4f2]">
+                        {labelForStatus(item.authStatus)}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-sm text-[#8ea0bd]">
+                      {item.createdAt ? new Date(item.createdAt).toLocaleDateString("pt-BR") : "-"}
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenDetails(item)}
+                        className="inline-flex items-center gap-2 rounded-xl border border-[#c52b7d]/50 px-3 py-2 text-xs font-semibold text-[#e16aa8] transition hover:bg-[#c52b7d] hover:text-white"
+                      >
+                        <MaterialIcon name="manage_search" className="h-4 w-4" />
+                        Detalhes
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : null}
 
